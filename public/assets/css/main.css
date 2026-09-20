@@ -1,0 +1,22 @@
+@font-face {
+  font-family: yekan;
+  src: url("/assets/font/persianFont/yekan-font/yekan-regular.woff");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+* {
+  font-family: yekan;
+}
+
+.orders-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 260ms ease
+}
+
+.orders-panel.height {
+  max-height: 2000px;
+  transition: all 2s;
+}
