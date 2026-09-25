@@ -6,7 +6,8 @@ import User from "@/models/User";
 import { defaultSiteSettings } from "@/lib/siteSettings";
 import { getSessionUser } from "@/lib/sessionUser";
 
-const publicFields = ["phone", "email", "address", "whatsapp", "instagram", "bale"] as const;
+const requiredFields = ["phone", "email", "address", "whatsapp", "instagram", "bale"] as const;
+const optionalFields = ["instagramUrl", "baleUrl", "mapUrl", "mapEmbedUrl", "baladUrl", "neshanUrl", "catalogPdfUrl"] as const;
 
 async function authorized() {
   const user = await getSessionUser();
@@ -27,15 +28,16 @@ export async function PUT(request: Request) {
   if (!admin) return NextResponse.json({ error: "فقط مدیر ارشد اجازه مدیریت تنظیمات را دارد" }, { status: 403 });
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   if (!body) return NextResponse.json({ error: "داده ارسالی نامعتبر است" }, { status: 400 });
-  const values = Object.fromEntries(publicFields.map((field) => [field, typeof body[field] === "string" ? body[field].trim() : ""]));
-  if (publicFields.some((field) => !values[field])) return NextResponse.json({ error: "تکمیل اطلاعات سایت الزامی است" }, { status: 400 });
+  const values = Object.fromEntries(requiredFields.map((field) => [field, typeof body[field] === "string" ? body[field].trim() : ""]));
+  const optionalValues = Object.fromEntries(optionalFields.map((field) => [field, typeof body[field] === "string" ? body[field].trim() : ""]));
+  if (requiredFields.some((field) => !values[field])) return NextResponse.json({ error: "تکمیل اطلاعات سایت الزامی است" }, { status: 400 });
   if (!String(values.email).includes("@")) return NextResponse.json({ error: "ایمیل نامعتبر است" }, { status: 400 });
   const adminUpdates: { firstName: string; lastName: string; mobile: string; password?: string } = { firstName: String(body.adminFirstName).trim(), lastName: String(body.adminLastName).trim(), mobile: String(body.adminMobile).trim() };
   if (!adminUpdates.firstName || !adminUpdates.lastName || !/^09\d{9}$/.test(adminUpdates.mobile)) return NextResponse.json({ error: "اطلاعات مدیر ارشد نامعتبر است" }, { status: 400 });
   const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
   if (newPassword && newPassword.length < 6) return NextResponse.json({ error: "رمز عبور باید حداقل ۶ کاراکتر باشد" }, { status: 400 });
   await connectDB();
-  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, key: "site" } }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
+  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, ...optionalValues, key: "site" } }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
   if (newPassword) adminUpdates.password = await bcrypt.hash(newPassword, 10);
   try {
     const updatedAdmin = await User.findOneAndUpdate({ role: "super_admin", _id: admin._id }, { $set: adminUpdates }, { new: true, runValidators: true }).select("firstName lastName mobile").lean();

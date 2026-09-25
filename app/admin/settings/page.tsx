@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import LinksQrCodeCard from '@/components/admin/LinksQrCodeCard';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState({
@@ -12,6 +13,13 @@ export default function AdminSettings() {
     instagram: 'https://instagram.com/farazbetar',
     whatsapp: '۰۹۱۲۱۲۳۴۵۶۷',
     bale: 'https://bale.ai/',
+    instagramUrl: 'https://instagram.com/fermo_cafe',
+    baleUrl: 'https://bale.ai/',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=35.7196944,51.3623611',
+    mapEmbedUrl: 'https://www.google.com/maps?q=35.7196944,51.3623611&hl=fa&z=16&output=embed',
+    baladUrl: 'https://balad.ir/p/rbvkLS_x4QW8?preview=true#15/35.720/51.363',
+    neshanUrl: 'https://neshan.org/maps/places/rbvkLS_x4QW8#c35.720-51.363',
+    catalogPdfUrl: '',
     adminFirstName: '',
     adminLastName: '',
     adminMobile: '',
@@ -25,6 +33,7 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingCatalog, setUploadingCatalog] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/settings', { credentials: 'include', cache: 'no-store' })
@@ -37,6 +46,23 @@ export default function AdminSettings() {
   const handleChange = (field: string, value: string) => {
     setSettings(prev => ({ ...prev, [field]: value }));
     setSaved(false);
+  };
+
+  const handleCatalogUpload = async (file: File) => {
+    setMessage(''); setUploadingCatalog(true);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      const response = await fetch('/api/admin/settings/catalog', { method: 'POST', body, credentials: 'include' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'آپلود کاتالوگ انجام نشد');
+      handleChange('catalogPdfUrl', result.url);
+      setMessage('فایل کاتالوگ آپلود شد؛ برای ثبت نهایی روی «ذخیره تنظیمات» کلیک کنید.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'آپلود کاتالوگ انجام نشد');
+    } finally {
+      setUploadingCatalog(false);
+    }
   };
 
   const handleSave = async () => {
@@ -58,7 +84,8 @@ export default function AdminSettings() {
   if (loading) return <div className="rounded-xl bg-white p-8 text-center text-gray-500 shadow">در حال بارگذاری تنظیمات...</div>;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <>
+      <div className="bg-white rounded-lg shadow p-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">تنظیمات سایت</h1>
       
       {saved && (
@@ -207,10 +234,96 @@ export default function AdminSettings() {
               <label className="block text-sm font-medium text-gray-700 mb-2">اینستاگرام</label>
               <input
                 type="url"
-                value={settings.instagram}
-                onChange={(e) => handleChange('instagram', e.target.value)}
+                value={settings.instagramUrl}
+                onChange={(e) => handleChange('instagramUrl', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک پشتیبانی در بله</label>
+              <input
+                type="url"
+                value={settings.baleUrl}
+                onChange={(e) => handleChange('baleUrl', e.target.value)}
+                placeholder="https://bale.ai/..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک گوگل مپ دفتر</label>
+              <input
+                type="url"
+                value={settings.mapUrl}
+                onChange={(e) => handleChange('mapUrl', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک نمایش نقشه گوگل داخل سایت (Embed)</label>
+              <input
+                type="url"
+                value={settings.mapEmbedUrl}
+                onChange={(e) => handleChange('mapEmbedUrl', e.target.value)}
+                placeholder="https://www.google.com/maps?q=...&output=embed"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="mt-2 text-xs text-gray-400">این لینک باید از نوع Google Maps Embed باشد؛ لینک مشاهده و لینک نمایش داخل سایت جدا هستند.</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک دفتر در بلد</label>
+              <input
+                type="url"
+                value={settings.baladUrl}
+                onChange={(e) => handleChange('baladUrl', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک دفتر در نشان</label>
+              <input
+                type="url"
+                value={settings.neshanUrl}
+                onChange={(e) => handleChange('neshanUrl', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لینک فایل کاتالوگ PDF</label>
+              <input
+                type="url"
+                value={settings.catalogPdfUrl}
+                onChange={(e) => handleChange('catalogPdfUrl', e.target.value)}
+                placeholder="https://.../catalog.pdf"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <label className="inline-flex cursor-pointer items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-[#d4af37] hover:text-[#8a6d18] has-disabled:cursor-not-allowed has-disabled:opacity-50">
+                  {uploadingCatalog ? 'در حال آپلود...' : 'آپلود فایل PDF'}
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className="hidden"
+                    disabled={uploadingCatalog}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void handleCatalogUpload(file);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
+                {settings.catalogPdfUrl && (
+                  <a href={settings.catalogPdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                    مشاهده فایل فعلی
+                  </a>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-gray-400">فقط PDF، حداکثر ۱۰ مگابایت. پس از آپلود، ذخیره تنظیمات را بزنید.</p>
             </div>
           </div>
         </div>
@@ -233,6 +346,8 @@ export default function AdminSettings() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+      <LinksQrCodeCard />
+    </>
   );
 }

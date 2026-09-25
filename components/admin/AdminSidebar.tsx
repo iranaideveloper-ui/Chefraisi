@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { QrCode } from 'lucide-react';
 import { 
   HiOutlineHome,
   HiOutlineShoppingBag,
@@ -131,6 +132,15 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         {/* Footer */}
         <div className="shrink-0 space-y-3 px-4 pb-4">
+          <a
+            href="/links"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 rounded-lg border border-[#d4af37] px-3 py-2 text-[#8a6d18] transition-colors hover:bg-[#fff8dc]"
+          >
+            <QrCode className="h-5 w-5" />
+            <span className="font-medium">صفحه لینک‌ها (QR)</span>
+          </a>
           <Link
             href="/"
             onClick={onClose}

@@ -4,10 +4,25 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const defaultAddress = "تهران، ستارخان، بین توحیدی و تهران ویلا (محله تهران ویلا)";
+const defaultMapLinks = {
+  mapUrl: "https://www.google.com/maps/search/?api=1&query=35.7196944,51.3623611",
+  mapEmbedUrl: "https://www.google.com/maps?q=35.7196944,51.3623611&hl=fa&z=16&output=embed",
+  baladUrl: "https://balad.ir/p/rbvkLS_x4QW8?preview=true#15/35.720/51.363",
+  neshanUrl: "https://neshan.org/maps/places/rbvkLS_x4QW8#c35.720-51.363",
+};
 
 export default function Location() {
   const [address, setAddress] = useState(defaultAddress);
-  useEffect(() => { fetch("/api/site-settings", { cache: "no-store" }).then((response) => response.json()).then((result) => { if (result.settings?.address) setAddress(result.settings.address); }).catch(() => undefined); }, []);
+  const [mapLinks, setMapLinks] = useState(defaultMapLinks);
+  useEffect(() => {
+    fetch("/api/site-settings", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.settings?.address) setAddress(result.settings.address);
+        setMapLinks((current) => ({ ...current, ...result.settings }));
+      })
+      .catch(() => undefined);
+  }, []);
   return (
     <section
       className="py-10 sm:py-14 bg-gray-900 flex flex-col items-center justify-center fade-in"
@@ -24,7 +39,7 @@ export default function Location() {
           {/* نقشه عریض‌تر */}
           <div className="flex-1 md:w-1/2">
             <iframe
-              src="https://www.google.com/maps?q=35.7196944,51.3623611&hl=fa&z=16&output=embed"
+              src={mapLinks.mapEmbedUrl || defaultMapLinks.mapEmbedUrl}
               width="100%"
               height="340"
               style={{
@@ -70,7 +85,7 @@ export default function Location() {
                 {address}
               </p>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=35.7196944,51.3623611"
+                href={mapLinks.mapUrl || defaultMapLinks.mapUrl}
                 target="_blank"
                 rel="noopener"
                 className="mt-3 inline-block bg-[#d4af37] text-gray-900 font-bold py-2 px-5 rounded-lg shadow hover:bg-[rgba(212,175,55,0.8)] transition text-xs sm:text-sm self-start text-right"
@@ -88,7 +103,7 @@ export default function Location() {
               />
               <div className="flex flex-row gap-6">
                 <a
-                  href="https://balad.ir/p/rbvkLS_x4QW8?preview=true#15/35.720/51.363"
+                  href={mapLinks.baladUrl}
                   target="_blank"
                   rel="noopener"
                   title="نمایش در بلد"
@@ -97,7 +112,7 @@ export default function Location() {
                   <Image src="/assets/images/بلد.png" alt="بلد" className="mb-1 h-10 w-10" width={128} height={128} />
                 </a>
                 <a
-                  href="https://neshan.org/maps/places/rbvkLS_x4QW8#c35.720-51.363"
+                  href={mapLinks.neshanUrl}
                   target="_blank"
                   rel="noopener"
                   title="نمایش در نشان"
