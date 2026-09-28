@@ -3,6 +3,7 @@ import type { PublicCourse } from "@/lib/getCourses";
 
 export default function Menu({ courses }: { courses: PublicCourse[] }) {
   const visibleCourses = courses.filter((course) => {
+    if (!course.slug) return false;
     const title = course.title?.trim() || "";
     return title.length > 1 && !/^untitled\s*\d*$/i.test(title);
   });
@@ -18,7 +19,7 @@ export default function Menu({ courses }: { courses: PublicCourse[] }) {
         دوره های آموزش
       </h2>
       <div className="max-w-6xl mx-auto relative fade-in">
-        <CardCarousel items={visibleCourses.slice(0, 6)} />
+        <CardCarousel items={visibleCourses} />
       </div>
     </section>
   );

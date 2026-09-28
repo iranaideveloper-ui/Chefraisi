@@ -62,8 +62,10 @@ export default function AdminHomepage() {
                 type="text"
                 value={banner.title}
                 onChange={(e) => handleChange('title', e.target.value)}
+                maxLength={80}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+              <span className="mt-1 block text-xs text-neutral-400">{banner.title.length}/80</span>
             </div>
 
             <div>
@@ -72,8 +74,10 @@ export default function AdminHomepage() {
                 type="text"
                 value={banner.subtitle}
                 onChange={(e) => handleChange('subtitle', e.target.value)}
+                maxLength={80}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+              <span className="mt-1 block text-xs text-neutral-400">{banner.subtitle.length}/80</span>
             </div>
 
             <div>
@@ -82,8 +86,10 @@ export default function AdminHomepage() {
                 value={banner.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={3}
+                maxLength={250}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+              <span className="mt-1 block text-xs text-neutral-400">{banner.description.length}/250</span>
             </div>
 
             <div>

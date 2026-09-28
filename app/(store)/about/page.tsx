@@ -62,16 +62,16 @@ export default async function About() {
             {content.services.map(({ number, title, description, items }, index) => {
               const Icon = serviceIcons[index] ?? Compass;
               return (
-              <article key={title} className="group relative overflow-hidden border border-white/10 bg-[#121211] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#d4af37]/60 hover:shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:p-8">
+              <article key={title} className="group relative min-w-0 overflow-hidden border border-white/10 bg-[#121211] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#d4af37]/60 hover:shadow-[0_18px_50px_rgba(0,0,0,0.24)] sm:p-8">
                 <div className="pointer-events-none absolute right-0 top-0 h-px w-0 bg-[#d4af37] transition-all duration-500 group-hover:w-full" />
                 <div className="mb-8 flex items-start justify-between">
                   <div className="flex h-12 w-12 items-center justify-center border border-[#d4af37]/40 bg-[#d4af37]/10 text-[#d4af37]"><Icon className="h-6 w-6" /></div>
                   <span className="font-mono text-sm text-stone-600">{number}</span>
                 </div>
-                <h3 className="text-2xl font-extrabold text-stone-100">{title}</h3>
-                <p className="mt-2 text-sm text-[#d4af37]">{description}</p>
+                <h3 className="line-clamp-2 break-words text-2xl font-extrabold text-stone-100">{title}</h3>
+                <p className="mt-2 line-clamp-3 break-words text-sm text-[#d4af37]">{description}</p>
                 <ul className="mt-7 space-y-4 border-t border-white/10 pt-6">
-                  {items.map((item) => <li key={item} className="flex gap-3 text-sm leading-7 text-stone-300"><CircleCheck className="mt-1 h-4 w-4 shrink-0 text-[#d4af37]" />{item}</li>)}
+                  {items.map((item) => <li key={item} className="flex min-w-0 gap-3 break-words text-sm leading-7 text-stone-300"><CircleCheck className="mt-1 h-4 w-4 shrink-0 text-[#d4af37]" /><span className="min-w-0 break-words">{item}</span></li>)}
                 </ul>
               </article>
               );
@@ -84,17 +84,17 @@ export default async function About() {
         <Image src={content.processImage} alt="نمونه‌ای از مسیر اجرای پروژه" fill sizes="100vw" className="-z-20 object-cover object-center opacity-35 saturate-125" />
         <div className="absolute inset-0 -z-10 bg-linear-to-l from-[#17150e]/98 via-[#17150e]/88 to-[#17150e]/45" />
         <div className="relative mx-auto max-w-7xl">
-          <div className="max-w-2xl"><p className="mb-3 text-sm font-bold text-[#f5d77d]">روش همکاری</p><h2 className="text-3xl font-black sm:text-4xl">{content.processTitle}</h2><p className="mt-4 text-sm leading-7 text-stone-300">{content.processDescription}</p></div>
+          <div className="max-w-2xl"><p className="mb-3 text-sm font-bold text-[#f5d77d]">روش همکاری</p><h2 className="break-words text-3xl font-black sm:text-4xl">{content.processTitle}</h2><p className="mt-4 break-words text-sm leading-7 text-stone-300">{content.processDescription}</p></div>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {content.process.map(({ title, text }, index) => { const Icon = processIcons[index] ?? Lightbulb; return <div key={title} className="relative border border-white/15 bg-black/20 p-5 backdrop-blur-sm transition-colors hover:border-[#d4af37]/70"><span className="font-mono text-xs text-[#f5d77d]">۰{index + 1}</span><Icon className="absolute left-5 top-5 h-5 w-5 text-[#d4af37]" /><h3 className="mt-8 text-xl font-bold">{title}</h3><p className="mt-3 text-sm leading-7 text-stone-300">{text}</p></div>; })}
+            {content.process.map(({ title, text }, index) => { const Icon = processIcons[index] ?? Lightbulb; return <div key={title} className="relative min-w-0 border border-white/15 bg-black/20 p-5 backdrop-blur-sm transition-colors hover:border-[#d4af37]/70"><span className="font-mono text-xs text-[#f5d77d]">۰{index + 1}</span><Icon className="absolute left-5 top-5 h-5 w-5 text-[#d4af37]" /><h3 className="mt-8 line-clamp-2 break-words text-xl font-bold">{title}</h3><p className="mt-3 line-clamp-3 break-words text-sm leading-7 text-stone-300">{text}</p></div>; })}
           </div>
         </div>
       </section>
 
       <section className="border-t border-white/10 px-5 py-16 text-center sm:px-8 lg:py-24">
         <Store className="mx-auto mb-5 h-7 w-7 text-[#d4af37]" />
-        <h2 className="text-3xl font-black sm:text-4xl">{content.ctaTitle}</h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-400">{content.ctaDescription}</p>
+        <h2 className="break-words text-3xl font-black sm:text-4xl">{content.ctaTitle}</h2>
+        <p className="mx-auto mt-4 max-w-xl break-words text-sm leading-7 text-stone-400">{content.ctaDescription}</p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3">
           <Link href="/#reservation" className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-[#d4af37] px-7 py-3 font-bold text-[#120f09] shadow-[0_10px_30px_rgba(212,175,55,0.22)] transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#e6c65e]">
             {content.ctaButton} <ArrowLeft className="h-4 w-4" />

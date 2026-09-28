@@ -50,8 +50,8 @@ export default function AboutHero({ content }: { content: AboutContent }) {
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 p-5 text-right sm:p-7" dir="rtl">
               <div>
-                <p className="text-sm font-bold text-[#f5d77d]">{slide.label}</p>
-                <p className="mt-1 text-xl font-black text-white sm:text-2xl">{slide.detail}</p>
+                <p className="line-clamp-1 break-words text-sm font-bold text-[#f5d77d]">{slide.label}</p>
+                <p className="mt-1 line-clamp-2 break-words text-xl font-black text-white sm:text-2xl">{slide.detail}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button
@@ -83,17 +83,17 @@ export default function AboutHero({ content }: { content: AboutContent }) {
 
         <div className="order-2 text-right lg:order-2" dir="rtl">
           <p dir="ltr" className="mb-5 flex items-center justify-start gap-3 border-l-2 border-[#d4af37] pl-4 text-left text-lg font-bold tracking-[0.18em] text-[#f5d77d] sm:text-xl lg:text-2xl">FARAZ BARTAR RAMONA <span className="h-px w-10 bg-[#d4af37]/70" /></p>
-          <h1 className="max-w-3xl text-2xl font-black leading-normal tracking-tight sm:text-4xl lg:text-5xl">
+          <h1 className="max-w-3xl break-words text-2xl font-black leading-normal tracking-tight sm:text-4xl lg:text-5xl">
             {content.heroTitle}
             <span className="block text-[#d4af37]">{content.heroAccent}</span>
             تبدیل می‌کنیم.
           </h1>
           <div className="mt-6 border-r border-[#d4af37]/70 pr-6">
-            <p className="text-lg leading-9 text-stone-300 sm:text-xl">
+            <p className="break-words text-lg leading-9 text-stone-300 sm:text-xl">
               {content.heroDescription}
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-start gap-3">
-              <a href={chatHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 border border-[#d4af37]/45 px-5 py-3 text-sm font-bold text-[#f5d77d] transition-colors hover:border-[#f5d77d] hover:bg-[#d4af37]/10 hover:text-white">
+              <a href={chatHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-w-0 items-center gap-3 break-words border border-[#d4af37]/45 px-5 py-3 text-sm font-bold text-[#f5d77d] transition-colors hover:border-[#f5d77d] hover:bg-[#d4af37]/10 hover:text-white">
                 {content.supportText} <ArrowLeft className="h-4 w-4" />
               </a>
               <a

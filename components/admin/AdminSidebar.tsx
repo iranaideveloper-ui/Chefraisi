@@ -27,6 +27,7 @@ const menuItems: Array<
   { href: '/admin', icon: HiOutlineHome, label: 'داشبورد' },
   { href: '/admin/consultations', icon: HiOutlineClipboardDocumentList, label: 'درخواست‌های مشاوره' },
   { href: '/admin/courses', icon: HiOutlineRectangleGroup, label: 'ثبت‌نام در دوره‌ها' },
+  { href: '/admin/articles', icon: HiOutlineClipboardDocumentList, label: 'مدیریت مقالات' },
   { href: '/admin/users', icon: HiOutlineUsers, label: 'مدیریت کاربران' },
   { href: '/admin/projects', icon: HiOutlineShoppingBag, label: 'مدیریت پروژه‌ها' },
   { href: '/admin/team', icon: HiOutlineUsers, label: 'مدیریت دپارتمان‌ها' },
@@ -54,7 +55,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const visibleItems = menuItems.filter((item) => {
     if ('type' in item) return true;
     if (role === 'super_admin') return true;
-    return ['/admin', '/admin/consultations', '/admin/courses', '/admin/projects', '/admin/payments'].includes(item.href);
+    return ['/admin', '/admin/consultations', '/admin/courses', '/admin/articles', '/admin/projects', '/admin/payments'].includes(item.href);
   });
 
   return (

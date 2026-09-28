@@ -46,10 +46,10 @@ export default function TeamCarousel({ items, className = "" }: TeamCarouselProp
               />
               <div className="flex h-full w-full items-center justify-center rounded-lg text-3xl text-[#d4af37]" aria-hidden="true">✦</div>
             </div>
-            <h3 className="flex h-15 w-full min-w-0 shrink-0 items-center justify-center overflow-hidden text-center text-lg font-bold leading-relaxed text-[#d4af37] sm:text-xl">
+            <h3 className="line-clamp-2 flex h-15 w-full min-w-0 shrink-0 items-center justify-center overflow-hidden break-words text-center text-lg font-bold leading-relaxed text-[#d4af37] sm:text-xl">
               {department.title}
             </h3>
-            <p className="mb-2 flex h-10 w-full min-w-0 shrink-0 items-start justify-center overflow-hidden text-center text-xs leading-5 text-gray-300 line-clamp-2 sm:text-sm">
+            <p className="mb-2 line-clamp-2 flex h-10 w-full min-w-0 shrink-0 items-start justify-center overflow-hidden break-words text-center text-xs leading-5 text-gray-300 sm:text-sm">
               {department.tagline}
             </p>
             <div className="flex h-20 w-full min-w-0 shrink-0 flex-col items-center justify-start gap-1 overflow-hidden">

@@ -37,16 +37,16 @@ export default function ProjectCarousel({ items, className = "" }: ProjectCarous
         </div>
       </div>
       <div className="p-4 sm:p-5 flex-1 flex flex-col text-right">
-        <h3 className="text-lg sm:text-xl font-bold text-[#d4af37] mb-2">{project.restaurantName}</h3>
+        <h3 className="mb-2 line-clamp-2 break-words text-lg font-bold text-[#d4af37] sm:text-xl">{project.restaurantName}</h3>
         <div className="flex justify-between items-center mb-3 text-xs sm:text-sm">
           <span className="text-gray-400">سال راه‌اندازی: {project.launchYear}</span>
-          <span className="text-[#d4af37] font-semibold">{project.cuisine}</span>
+          <span className="line-clamp-1 break-words text-[#d4af37] font-semibold">{project.cuisine}</span>
         </div>
-        <p className="text-gray-300 text-xs sm:text-sm mb-3 line-clamp-1">📍 {project.location}</p>
+        <p className="mb-3 line-clamp-2 break-words text-xs text-gray-300 sm:text-sm">📍 {project.location}</p>
         <div className="mb-3">
           <p className="text-[#d4af37] font-bold text-xs sm:text-sm mb-2">خدمات دریافت شده:</p>
           <div className="flex flex-wrap gap-1">
-            {(project.servicesProvided || []).map((service, index) => <span key={index} className="bg-gray-700 text-gray-200 text-xs px-2 py-1 rounded-full">{service}</span>)}
+            {(project.servicesProvided || []).map((service, index) => <span key={index} className="max-w-full break-words bg-gray-700 px-2 py-1 text-xs text-gray-200">{service}</span>)}
           </div>
         </div>
       </div>

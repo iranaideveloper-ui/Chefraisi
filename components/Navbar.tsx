@@ -90,6 +90,7 @@ export default function Navbar() {
             <Link href="/" className="hover:text-[#d4af37] transition">خانه</Link>
             <Link href="/about" className="hover:text-[#d4af37] transition">درباره ما</Link>
             <Link href="/#menu" className="hover:text-[#d4af37] transition">آموزش</Link>
+            <Link href="/articles" className="hover:text-[#d4af37] transition">مقالات</Link>
             <Link href="/#contact" className="hover:text-[#d4af37] transition">تماس با ما</Link>
             {user && <Link href={panelHref} className="hover:text-[#d4af37] transition">{isAdminUser ? "پنل ادمین" : "پنل کاربر"}</Link>}
           </div>
@@ -101,7 +102,8 @@ export default function Navbar() {
       <nav id="mobile-menu" className={`fixed inset-x-4 top-14 sm:top-16 z-30 mx-auto max-w-300 md:hidden flex flex-col rounded-lg bg-black/40 backdrop-blur-sm [-webkit-backdrop-filter:blur(8px)] border border-amber-200 shadow-lg text-white overflow-y-auto overscroll-contain transition-all duration-300 ${isOpen ? "max-h-[calc(100dvh-7rem)] p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:p-6 opacity-100" : "max-h-0 p-0 opacity-0 pointer-events-none"}`}>
         {[
           { href: "/", label: "خانه" }, { href: "/about", label: "درباره ما" },
-          { href: "/#menu", label: "آموزش" }, { href: "/#contact", label: "تماس با ما" },
+          { href: "/#menu", label: "آموزش" }, { href: "/articles", label: "مقالات" },
+          { href: "/#contact", label: "تماس با ما" },
           ...(user ? [{ href: panelHref, label: isAdminUser ? "پنل ادمین" : "پنل کاربر" }] : []),
           { href: "/auth", label: "ورود/ثبت نام" },
         ].map((item) => <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className="min-h-11 flex items-center py-2.5 font-extrabold tracking-wide drop-shadow transition hover:text-[#d4af37]">{item.label}</Link>)}

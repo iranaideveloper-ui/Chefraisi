@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null) as { items?: SubmittedItem[] } | null;
   if (!body || !Array.isArray(body.items) || !body.items.length) return NextResponse.json({ error: "سبد خرید نامعتبر است" }, { status: 400 });
 
-  const availableCourses = new Map((await getPublicCourses()).slice(0, 6).map((course) => [course.id, course]));
+  const availableCourses = new Map((await getPublicCourses()).filter((course) => !course.comingSoon).map((course) => [course.id, course]));
   const items = body.items.map((submittedItem) => {
     const courseId = Number(submittedItem.id);
     const count = Number(submittedItem.count);
