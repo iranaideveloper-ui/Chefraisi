@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useRef } from "react";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type Food = {
   id: string;
@@ -14,6 +15,7 @@ type Food = {
 
 export default function FoodsPage() {
   const confirm = useConfirmDialog();
+  const notify = useToast();
   const [foods, setFoods] = useState<Food[]>([
     {
       id: "1",
@@ -62,11 +64,11 @@ export default function FoodsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     // basic validation
-    if (!name.trim()) return alert("لطفا نام غذا را وارد کنید");
-    if (!ingredients.trim()) return alert("لطفا محتویات را وارد کنید");
+    if (!name.trim()) { notify("لطفا نام غذا را وارد کنید", "error"); return; }
+    if (!ingredients.trim()) { notify("لطفا محتویات را وارد کنید", "error"); return; }
     const parsedPrice = Number(price);
     if (!price || Number.isNaN(parsedPrice) || parsedPrice <= 0)
-      return alert("لطفا قیمت معتبر وارد کنید");
+      { notify("لطفا قیمت معتبر وارد کنید", "error"); return; }
 
     setIsSubmitting(true);
 

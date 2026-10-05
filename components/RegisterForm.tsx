@@ -37,7 +37,7 @@ export default function RegisterForm() {
       <div className="w-full">
       <div className="block mb-6 text-center">
         <h1 className="text-xl sm:text-2xl font-bold text-[#d4af37]">
-          ثبت نام در کافه فراز برتر رامونا
+          ثبت نام در فراز برتر رامونا
         </h1>
       </div>
 

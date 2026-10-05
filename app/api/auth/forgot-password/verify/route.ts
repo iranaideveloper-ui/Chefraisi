@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "کد تایید نامعتبر یا منقضی شده است" }, { status: 400 });
     }
 
-    if (user.passwordResetAttempts >= MAX_RESET_ATTEMPTS || user.passwordResetCodeExpiresAt.getTime() < Date.now()) {
+    if (user.passwordResetAttempts >= MAX_RESET_ATTEMPTS || user.passwordResetCodeExpiresAt.getTime() <= Date.now()) {
       return NextResponse.json({ success: false, error: "کد تایید نامعتبر یا منقضی شده است" }, { status: 400 });
     }
 

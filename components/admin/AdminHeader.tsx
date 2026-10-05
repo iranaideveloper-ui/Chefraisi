@@ -17,12 +17,17 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<ConsultationNotification[]>([]);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
+  const [adminName, setAdminName] = useState("");
 
   useEffect(() => {
     fetch('/api/auth/me', { credentials: 'include', cache: 'no-store' })
       .then((response) => response.json())
-      .then((data) => setIsSuperAdmin(data.user?.role === 'super_admin'))
+      .then((data) => {
+        setIsSuperAdmin(data.user?.role === 'super_admin');
+        const user = data.user;
+        setAdminName(user ? [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.mobile || '' : '');
+      })
       .catch(() => setIsSuperAdmin(false));
   }, []);
 
@@ -62,7 +67,7 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
           <button onClick={onToggleSidebar} className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
             <HiOutlineBars3 className="w-6 h-6 text-gray-600" />
           </button>
-          <button onClick={() => router.push('/admin')} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors font-medium text-sm">
+          <button onClick={() => router.push(isSuperAdmin ? '/admin' : '/admin/manager')} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors font-medium text-sm">
             <HiOutlineArrowLeft className="w-5 h-5" />
             <span className="hidden sm:inline">بازگشت به داشبورد</span>
           </button>
@@ -86,8 +91,8 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
           <div className="relative">
             <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">مدیر سیستم</p>
-                <p className="text-xs text-gray-500">admin@fermo.com</p>
+                <p className="text-sm font-medium text-gray-900">{isSuperAdmin === null ? 'پنل فراز برتر رامونا' : isSuperAdmin ? 'مدیر ارشد فراز برتر رامونا' : 'مدیر فراز برتر رامونا'}</p>
+                <p className="text-xs text-gray-500">{adminName || 'پنل مدیریت'}</p>
               </div>
               <HiOutlineUserCircle className="w-8 h-8 text-gray-600" />
             </button>

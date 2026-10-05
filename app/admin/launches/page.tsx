@@ -37,7 +37,7 @@ export default function AdminLaunches() {
   };
   const save = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setMessage("");
-    const payload = { ...form, launchYear: Number(form.launchYear), servicesProvided: form.servicesProvided.split(",").map((item) => item.trim()).filter(Boolean) };
+      const payload = { ...form, launchYear: Number(form.launchYear), servicesProvided: form.servicesProvided.split(/[,،]/).map((item) => item.trim()).filter(Boolean) };
     const response = await fetch("/api/admin/launches", { method: editingId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(editingId ? { ...payload, id: editingId } : payload) });
     const result = await response.json(); setSaving(false);
     if (!response.ok) { setMessage(result.error || "ذخیره راه‌اندازی انجام نشد"); return; }

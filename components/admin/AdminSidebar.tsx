@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { QrCode } from 'lucide-react';
+import { Inbox, QrCode } from 'lucide-react';
 import { 
   HiOutlineHome,
   HiOutlineShoppingBag,
@@ -26,6 +26,7 @@ const menuItems: Array<
 > = [
   { href: '/admin', icon: HiOutlineHome, label: 'داشبورد' },
   { href: '/admin/consultations', icon: HiOutlineClipboardDocumentList, label: 'درخواست‌های مشاوره' },
+  { href: '/admin/inbox', icon: Inbox, label: 'صندوق یادداشت‌ها' },
   { href: '/admin/courses', icon: HiOutlineRectangleGroup, label: 'ثبت‌نام در دوره‌ها' },
   { href: '/admin/articles', icon: HiOutlineClipboardDocumentList, label: 'مدیریت مقالات' },
   { href: '/admin/users', icon: HiOutlineUsers, label: 'مدیریت کاربران' },
@@ -53,10 +54,11 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   }, []);
 
   const visibleItems = menuItems.filter((item) => {
-    if ('type' in item) return true;
+    if ('type' in item) return role === 'super_admin';
     if (role === 'super_admin') return true;
-    return ['/admin', '/admin/consultations', '/admin/courses', '/admin/articles', '/admin/projects', '/admin/payments'].includes(item.href);
+    return ['/admin', '/admin/consultations', '/admin/courses', '/admin/articles', '/admin/projects'].includes(item.href);
   });
+  const dashboardHref = role === 'super_admin' ? '/admin' : '/admin/manager';
 
   return (
     <>
@@ -107,14 +109,15 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 return null;
               }
 
+              const href = item.href === '/admin' ? dashboardHref : item.href;
               const Icon = item.icon;
-              const isActive = pathname === item.href ||
-                (item.href !== '/admin' && pathname.startsWith(item.href));
+              const isActive = pathname === href ||
+                (href !== '/admin' && pathname.startsWith(href));
 
               return (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={href}
                     onClick={onClose}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                       isActive

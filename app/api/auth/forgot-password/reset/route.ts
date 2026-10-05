@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     await connectDB();
     const user = await User.findOne({ mobile });
-    if (!user || !user.passwordResetCodeHash || !user.passwordResetCodeExpiresAt || user.passwordResetAttempts >= MAX_RESET_ATTEMPTS || user.passwordResetCodeExpiresAt.getTime() < Date.now()) {
+    if (!user || !user.passwordResetCodeHash || !user.passwordResetCodeExpiresAt || user.passwordResetAttempts >= MAX_RESET_ATTEMPTS || user.passwordResetCodeExpiresAt.getTime() <= Date.now()) {
       return NextResponse.json({ success: false, error: "کد تایید نامعتبر یا منقضی شده است" }, { status: 400 });
     }
 

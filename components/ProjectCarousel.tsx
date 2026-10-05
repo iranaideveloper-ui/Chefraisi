@@ -32,7 +32,7 @@ export default function ProjectCarousel({ items, className = "" }: ProjectCarous
         />
         <div className="absolute top-3 right-3">
           <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${project.status === "open" ? "bg-green-600" : "bg-blue-600"}`}>
-            {project.status === "open" ? "فعال" : "بازسازی‌شده"}
+            {project.status === "open" ? "تکمیل‌شده" : "به‌روزرسانی"}
           </span>
         </div>
       </div>

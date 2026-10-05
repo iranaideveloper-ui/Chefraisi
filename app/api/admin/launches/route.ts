@@ -12,7 +12,9 @@ function validate(body: Record<string, unknown>) {
   if (fields.some((field) => !values[field])) return { error: "تکمیل اطلاعات اصلی راه‌اندازی الزامی است" };
   if (typeof values.launchYear !== "number" || !Number.isInteger(values.launchYear) || values.launchYear < 1300 || values.launchYear > 1600) return { error: "سال راه‌اندازی نامعتبر است" };
   const servicesProvided = Array.isArray(body.servicesProvided) ? body.servicesProvided.filter((service): service is string => typeof service === "string" && Boolean(service.trim())).map((service) => service.trim()) : [];
-  return { values: { ...values, servicesProvided } };
+  if (body.status !== undefined && body.status !== "open" && body.status !== "renovated") return { error: "وضعیت راه‌اندازی نامعتبر است" };
+  const status = body.status === "renovated" ? "renovated" : "open";
+  return { values: { ...values, servicesProvided, status } };
 }
 async function authorized(permission: "view" | "create" | "delete" = "view") { return Boolean(await getAdminUser(permission)); }
 async function ensureSeeded() {

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type User = {
   id: string;
@@ -19,6 +20,7 @@ type ApiUser = { _id: string; firstName: string; lastName: string; mobile: strin
 
 export default function UsersPage() {
   const confirm = useConfirmDialog();
+  const notify = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [activeTab, setActiveTab] = useState<"admins" | "customers">("admins");
   const [loading, setLoading] = useState(true);
@@ -72,7 +74,7 @@ export default function UsersPage() {
   async function updateRole(id: string, role: "user" | "admin") {
     const response = await fetch("/api/admin/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ id, role }) });
     const result = await response.json();
-    if (!response.ok) { alert(result.error || "تغییر نقش انجام نشد"); return; }
+    if (!response.ok) { notify(result.error || "تغییر نقش انجام نشد", "error"); return; }
     setUsers((current) => current.map((user) => user.id === id ? { ...user, role, isAdmin: role === "admin" } : user));
   }
 
@@ -80,7 +82,7 @@ export default function UsersPage() {
     event.preventDefault(); setSaving(true);
     const response = await fetch("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(newAdmin) });
     const result = await response.json(); setSaving(false);
-    if (!response.ok) { alert(result.error || "ایجاد ادمین انجام نشد"); return; }
+    if (!response.ok) { notify(result.error || "ایجاد ادمین انجام نشد", "error"); return; }
     const user = result.user;
     setUsers((current) => [{ id: user._id, firstName: user.firstName, lastName: user.lastName, phone: user.mobile, role: user.role, isAdmin: true }, ...current]);
     setNewAdmin({ firstName: "", lastName: "", mobile: "", password: "" }); setShowCreateForm(false);
@@ -90,7 +92,7 @@ export default function UsersPage() {
     if (!await confirm({ title: "حذف کاربر", description: "این کاربر حذف می‌شود و امکان بازگردانی آن وجود ندارد." })) return;
     const response = await fetch("/api/admin/users", { method: "DELETE", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ id }) });
     const result = await response.json();
-    if (!response.ok) { alert(result.error || "حذف کاربر انجام نشد"); return; }
+    if (!response.ok) { notify(result.error || "حذف کاربر انجام نشد", "error"); return; }
     setUsers((current) => current.filter((user) => user.id !== id));
   }
 
@@ -98,7 +100,7 @@ export default function UsersPage() {
     if (!await confirm({ title: "ریست رمز عبور", description: "رمز جدید ساخته و از طریق پیامک برای شماره موبایل کاربر ارسال می‌شود.", confirmLabel: "ریست رمز" })) return;
     const response = await fetch("/api/admin/users/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ id: userId }) });
     const result = await response.json();
-    alert(response.ok ? result.message : result.error || "ریست رمز انجام نشد");
+    notify(response.ok ? result.message : result.error || "ریست رمز انجام نشد", response.ok ? "success" : "error");
   }
 
   // Optional: persist to localStorage (commented out for now)

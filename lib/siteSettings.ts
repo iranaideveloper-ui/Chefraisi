@@ -5,6 +5,7 @@ export const defaultSiteSettings = {
   siteName: "فراز برتر رامونا",
   siteDescription: "مشاوره، طراحی، آموزش و راه‌اندازی رستوران‌ها صفر تا صد",
   phone: "۰۲۱-۱۲۳۴۵۶۷۸",
+  phoneMobile: "۰۹۱۲۷۳۵۱۱۲۴",
   email: "info@farazbetar.ir",
   address: "تهران، ستارخان، بین توحیدی و تهران ویلا (محله تهران ویلا)",
   whatsapp: "۰۹۱۲۷۳۵۱۱۲۴",

@@ -30,6 +30,7 @@ export async function PUT(request: Request) {
   if (!body) return NextResponse.json({ error: "داده ارسالی نامعتبر است" }, { status: 400 });
   const values = Object.fromEntries(requiredFields.map((field) => [field, typeof body[field] === "string" ? body[field].trim() : ""]));
   const optionalValues = Object.fromEntries(optionalFields.map((field) => [field, typeof body[field] === "string" ? body[field].trim() : ""]));
+  const phoneMobile = typeof body.phoneMobile === "string" ? body.phoneMobile.trim() : undefined;
   if (requiredFields.some((field) => !values[field])) return NextResponse.json({ error: "تکمیل اطلاعات سایت الزامی است" }, { status: 400 });
   if (!String(values.email).includes("@")) return NextResponse.json({ error: "ایمیل نامعتبر است" }, { status: 400 });
   const adminUpdates: { firstName: string; lastName: string; mobile: string; password?: string } = { firstName: String(body.adminFirstName).trim(), lastName: String(body.adminLastName).trim(), mobile: String(body.adminMobile).trim() };
@@ -37,7 +38,7 @@ export async function PUT(request: Request) {
   const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
   if (newPassword && newPassword.length < 6) return NextResponse.json({ error: "رمز عبور باید حداقل ۶ کاراکتر باشد" }, { status: 400 });
   await connectDB();
-  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, ...optionalValues, key: "site" } }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
+  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, ...optionalValues, ...(phoneMobile !== undefined ? { phoneMobile } : {}), key: "site" } }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
   if (newPassword) adminUpdates.password = await bcrypt.hash(newPassword, 10);
   try {
     const updatedAdmin = await User.findOneAndUpdate({ role: "super_admin", _id: admin._id }, { $set: adminUpdates }, { new: true, runValidators: true }).select("firstName lastName mobile").lean();

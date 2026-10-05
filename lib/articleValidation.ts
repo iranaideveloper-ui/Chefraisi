@@ -1,4 +1,4 @@
-export const articleCategories = ["launch", "cooking", "design", "management"] as const;
+export const articleCategories = ["launch", "cooking", "design", "management", "equipment", "franchise"] as const;
 export type ArticleCategory = (typeof articleCategories)[number];
 
 export type ArticleInput = {
@@ -49,7 +49,6 @@ export function validateArticleInput(input: unknown): { data?: ArticleInput; err
   if (!title || !category || !content) return { error: "عنوان، دسته‌بندی و متن مقاله الزامی است" };
   if (title.length > 100) return { error: "عنوان نمی‌تواند بیشتر از ۱۰۰ کاراکتر باشد" };
   if (excerpt.length > 180) return { error: "چکیده نمی‌تواند بیشتر از ۱۸۰ کاراکتر باشد" };
-  if (content.length > 10000) return { error: "متن مقاله نمی‌تواند بیشتر از ۱۰۰۰۰ کاراکتر باشد" };
   if (image.length > 500) return { error: "نشانی تصویر نامعتبر است" };
   if (!slug) return { error: "عنوان برای ساخت نشانی مقاله معتبر نیست" };
   if (!articleCategories.includes(category as ArticleCategory)) return { error: "دسته‌بندی مقاله نامعتبر است" };

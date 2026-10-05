@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type Order = { id: string; customer: { name: string }; createdAt: string; items: { id?: number; name: string; qty: number; price: number }[] };
 
 export default function AdminCourses() {
   const confirm = useConfirmDialog();
+  const notify = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -19,7 +21,7 @@ export default function AdminCourses() {
     const key = `${orderId}-${courseId}`; setDeleting(key);
     const response = await fetch(`/api/admin/orders/${orderId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ courseId }) });
     const result = await response.json();
-    if (!response.ok) window.alert(result.error || "حذف ثبت‌نام انجام نشد");
+    if (!response.ok) notify(result.error || "حذف ثبت‌نام انجام نشد", "error");
     else setOrders((current) => current.map((order) => order.id === orderId ? { ...order, items: order.items.filter((item) => item.id !== courseId) } : order).filter((order) => order.items.length));
     setDeleting(null);
   };

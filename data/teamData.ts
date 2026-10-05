@@ -6,6 +6,18 @@ export interface Department {
   image: string;
 }
 
+export const websiteAiDepartment = {
+  id: 5,
+  title: "دپارتمان طراحی وبسایت و هوشمندسازی",
+  url: "https://kingcodeai.com",
+} as const;
+
+export function isWebsiteAiDepartment(department: { id?: number; legacyId?: number; title?: string }) {
+  return department.id === websiteAiDepartment.id
+    || department.legacyId === websiteAiDepartment.id
+    || department.title?.trim() === websiteAiDepartment.title;
+}
+
 export const departmentsData: Department[] = [
   {
     id: 1,

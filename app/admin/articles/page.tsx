@@ -5,8 +5,9 @@ import Image from "next/image";
 import { BookOpen, Clock3, Pencil, Plus, Trash2, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useAdminRole } from "@/components/admin/useAdminRole";
 
-type ArticleCategory = "launch" | "cooking" | "design" | "management";
+type ArticleCategory = "launch" | "cooking" | "design" | "management" | "equipment" | "franchise";
 
 type ArticleRecord = {
   _id: string;
@@ -26,8 +27,10 @@ type ArticleForm = Omit<ArticleRecord, "_id" | "slug" | "createdAt">;
 const categoryOptions: { value: ArticleCategory; label: string }[] = [
   { value: "launch", label: "راه‌اندازی رستوران" },
   { value: "cooking", label: "آموزش آشپزی" },
-  { value: "design", label: "طراحی و منو" },
+  { value: "design", label: "آیا می‌دانید" },
   { value: "management", label: "مدیریت و بیزینس" },
+  { value: "equipment", label: "تجهیزات آشپزخانه" },
+  { value: "franchise", label: "فرانچایز" },
 ];
 
 const emptyForm: ArticleForm = {
@@ -44,6 +47,7 @@ const inputClass = "mt-1 block min-h-11 w-full rounded-lg border border-gray-300
 
 export default function AdminArticlesPage() {
   const confirm = useConfirmDialog();
+  const isSuperAdmin = useAdminRole();
   const [articles, setArticles] = useState<ArticleRecord[]>([]);
   const [form, setForm] = useState<ArticleForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -87,7 +91,7 @@ export default function AdminArticlesPage() {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ...form, readingTime: Number(form.readingTime) }),
+        body: JSON.stringify({ ...form, readingTime: Number(form.readingTime), published: isSuperAdmin && form.published }),
       });
       const result = await response.json() as { article?: ArticleRecord; error?: string };
       if (!response.ok) throw new Error(result.error || "ذخیره مقاله انجام نشد");
@@ -176,7 +180,7 @@ export default function AdminArticlesPage() {
           </div>
           <button
             type="button"
-            onClick={() => { setEditingId(null); setForm(emptyForm); setFormOpen(true); }}
+            onClick={() => { setEditingId(null); setForm({ ...emptyForm, published: isSuperAdmin }); setFormOpen(true); }}
             className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#d4af37] px-4 py-2 text-sm font-bold text-gray-950 transition hover:bg-[#c5a12e]"
           >
             <Plus className="h-4 w-4" /> افزودن مقاله جدید
@@ -189,14 +193,14 @@ export default function AdminArticlesPage() {
           <div className="py-14 text-center text-gray-500">
             <BookOpen className="mx-auto mb-3 h-8 w-8 text-[#b8962e]" />
             <p className="font-semibold">هنوز مقاله‌ای ثبت نشده است.</p>
-            <button
+            {isSuperAdmin && <button
               type="button"
               onClick={() => void seedDefaultArticles()}
               disabled={seeding}
               className="mt-4 min-h-10 rounded-lg border border-[#d4af37] px-4 py-2 text-sm font-semibold text-[#806414] transition hover:bg-[#d4af37]/10 disabled:cursor-wait disabled:opacity-60"
             >
               {seeding ? "در حال درون‌ریزی..." : "درون‌ریزی مقالات اولیه"}
-            </button>
+            </button>}
           </div>
         ) : (
           <>
@@ -209,7 +213,7 @@ export default function AdminArticlesPage() {
                     <th className="px-3 py-3 font-semibold">زمان مطالعه</th>
                     <th className="px-3 py-3 font-semibold">تاریخ</th>
                     <th className="px-3 py-3 font-semibold">وضعیت</th>
-                    <th className="px-3 py-3 font-semibold">عملیات</th>
+                    {isSuperAdmin && <th className="px-3 py-3 font-semibold">عملیات</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -225,7 +229,7 @@ export default function AdminArticlesPage() {
                       <td className="px-3 py-3 text-gray-600">{article.readingTime} دقیقه</td>
                       <td className="whitespace-nowrap px-3 py-3 text-gray-600">{formatDate(article.createdAt)}</td>
                       <td className="px-3 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${article.published ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>{article.published ? "منتشرشده" : "پیش‌نویس"}</span></td>
-                      <td className="px-3 py-3"><ArticleActions onEdit={() => editArticle(article)} onDelete={() => void deleteArticle(article)} /></td>
+                      {isSuperAdmin && <td className="px-3 py-3"><ArticleActions onEdit={() => editArticle(article)} onDelete={() => void deleteArticle(article)} /></td>}
                     </tr>
                   ))}
                 </tbody>
@@ -244,7 +248,7 @@ export default function AdminArticlesPage() {
                   </div>
                   <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
                     <div className="flex items-center gap-2"><span className="text-xs text-gray-500">{formatDate(article.createdAt)}</span><span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${article.published ? "bg-green-50 text-green-700" : "bg-gray-200 text-gray-600"}`}>{article.published ? "منتشرشده" : "پیش‌نویس"}</span></div>
-                    <ArticleActions onEdit={() => editArticle(article)} onDelete={() => void deleteArticle(article)} />
+                    {isSuperAdmin && <ArticleActions onEdit={() => editArticle(article)} onDelete={() => void deleteArticle(article)} />}
                   </div>
                 </article>
               ))}
@@ -285,12 +289,12 @@ export default function AdminArticlesPage() {
                 <span className="mt-1 block text-xs text-neutral-400">{form.excerpt.length}/180</span>
               </label>
               <label className="block text-sm font-semibold text-gray-700">متن کامل مقاله
-                <textarea className={`${inputClass} min-h-56 resize-y leading-7`} value={form.content} onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))} maxLength={10000} rows={8} required />
-                <span className="mt-1 block text-xs text-neutral-400">{form.content.length}/10000</span>
+                <textarea className={`${inputClass} min-h-56 resize-y leading-7`} value={form.content} onChange={(event) => setForm((current) => ({ ...current, content: event.target.value }))} rows={8} required />
+                <span className="mt-1 block text-xs text-neutral-400">{form.content.length} کاراکتر</span>
               </label>
-              <label className="flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700">
+              {isSuperAdmin && <label className="flex min-h-11 items-center gap-2 text-sm font-semibold text-gray-700">
                 <input type="checkbox" checked={form.published} onChange={(event) => setForm((current) => ({ ...current, published: event.target.checked }))} className="h-4 w-4 accent-[#d4af37]" /> انتشار مقاله
-              </label>
+              </label>}
               <div className="flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-4">
                 <button type="button" onClick={closeForm} disabled={saving} className="min-h-11 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">انصراف</button>
                 <button type="submit" disabled={saving} className="min-h-11 rounded-lg bg-[#d4af37] px-5 py-2 text-sm font-bold text-gray-950 transition hover:bg-[#c5a12e] disabled:cursor-wait disabled:opacity-60">{saving ? "در حال ذخیره..." : "ذخیره مقاله"}</button>

@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Consultation from "@/models/Consultation";
+import User from "@/models/User";
 import { getSessionUser } from "@/lib/sessionUser";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendMelliPayamakSms } from "@/lib/passwordReset";
 
 type ConsultationPayload = {
   name?: string;
@@ -50,12 +53,38 @@ export async function POST(request: Request) {
     }
   }
 
+  const rateLimitResponse = enforceRateLimit({
+    key: `consultation:submit:${getClientIp(request)}`,
+    limit: 3,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (rateLimitResponse) return rateLimitResponse;
+
   await connectDB();
 
   const consultation = await Consultation.create({
     ...payload,
     userId: user?._id ?? null,
     userMobile: user?.mobile ?? payload.phone,
+  });
+
+  after(async () => {
+    try {
+      const superAdmin = await User.findOne({ role: "super_admin" }).select("mobile").lean();
+      if (!superAdmin?.mobile) return;
+      const smsField = (value: string, maxLength: number) => value.replace(/\s+/g, " ").trim().slice(0, maxLength);
+      const details = [
+        "درخواست جدید مشاوره",
+        `نام: ${smsField(`${payload.name} ${payload.family}`, 80)}`,
+        `شماره تماس: ${smsField(payload.phone || "", 24)}`,
+        `ایمیل: ${smsField(payload.email || "", 80)}`,
+        `نوع: ${smsField(payload.consultationType || "", 50)}`,
+        ...(payload.description ? [`توضیحات: ${smsField(payload.description, 140)}`] : []),
+      ];
+      await sendMelliPayamakSms(superAdmin.mobile, details.join(" | "));
+    } catch (error) {
+      console.error("Super-admin consultation SMS notification failed:", error instanceof Error ? error.message : error);
+    }
   });
 
   return NextResponse.json({ consultation }, { status: 201 });

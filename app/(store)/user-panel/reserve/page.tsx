@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useState } from 'react';
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface ReservationItem {
 	id: string;
@@ -19,6 +21,8 @@ interface ReservationItem {
 }
 
 export default function Page() {
+	const notify = useToast();
+	const confirm = useConfirmDialog();
 	const [items, setItems] = useState<ReservationItem[]>([]);
 
 	useEffect(() => {
@@ -47,27 +51,27 @@ export default function Page() {
 		}
 	}, []);
 
-	const cancelReservation = (id: string) => {
-		if (!confirm('آیا از لغو این رزرو مطمئن هستید؟')) return;
+	const cancelReservation = async (id: string) => {
+		if (!await confirm({ title: 'لغو رزرو', description: 'آیا از لغو این رزرو مطمئن هستید؟', confirmLabel: 'لغو رزرو' })) return;
 		const key = 'fermo_reservations';
 		const updated = items.filter(i => i.id !== id);
 		localStorage.setItem(key, JSON.stringify(updated));
 		setItems(updated);
 	};
 
-	const payDeposit = (id: string) => {
+	const payDeposit = async (id: string) => {
 		const idx = items.findIndex(i => i.id === id);
 		if (idx === -1) return;
 		const item = items[idx];
 		if (!item.depositAmount || item.depositAmount <= 0) {
-			alert('این رزرو بیعانه ندارد.');
+			notify('این رزرو بیعانه ندارد.', 'info');
 			return;
 		}
 		if (item.depositPaid) {
-			alert('بیعانه قبلاً پرداخت شده است.');
+			notify('بیعانه قبلاً پرداخت شده است.', 'info');
 			return;
 		}
-		if (!confirm(`آیا مایل به پرداخت بیعانه به مقدار ${item.depositAmount.toLocaleString()} تومان هستید؟`)) return;
+		if (!await confirm({ title: 'تأیید پرداخت بیعانه', description: `آیا مایل به پرداخت بیعانه به مقدار ${item.depositAmount.toLocaleString()} تومان هستید؟`, confirmLabel: 'ادامه به پرداخت', confirmTone: 'primary' })) return;
 
 		// simulate payment
 		const updated = items.slice();
@@ -79,7 +83,7 @@ export default function Page() {
 		};
 		localStorage.setItem('fermo_reservations', JSON.stringify(updated));
 		setItems(updated);
-		alert('پرداخت بیعانه با موفقیت انجام شد.');
+		notify('پرداخت بیعانه با موفقیت انجام شد.', 'success');
 	};
 
 	return (

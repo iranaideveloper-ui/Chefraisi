@@ -6,6 +6,7 @@ const SiteSettingsSchema = new Schema(
     siteName: { type: String, default: "فراز برتر رامونا", trim: true, maxlength: 80 },
     siteDescription: { type: String, default: "مشاوره، طراحی، آموزش و راه‌اندازی رستوران‌ها صفر تا صد", trim: true, maxlength: 200 },
     phone: { type: String, default: "۰۲۱-۱۲۳۴۵۶۷۸", trim: true, maxlength: 40 },
+    phoneMobile: { type: String, default: "۰۹۱۲۷۳۵۱۱۲۴", trim: true, maxlength: 40 },
     email: { type: String, default: "info@farazbetar.ir", trim: true, maxlength: 160 },
     address: { type: String, default: "تهران، ستارخان، بین توحیدی و تهران ویلا (محله تهران ویلا)", trim: true, maxlength: 500 },
     whatsapp: { type: String, default: "۰۹۱۲۷۳۵۱۱۲۴", trim: true, maxlength: 40 },

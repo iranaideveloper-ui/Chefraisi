@@ -6,6 +6,7 @@ export function getZarinpalConfig() {
   return {
     merchantId,
     isConfigured: Boolean(merchantId),
+    isSandbox,
     requestUrl: `${host}/pg/v4/payment/request.json`,
     verifyUrl: `${host}/pg/v4/payment/verify.json`,
     startPayUrl: isSandbox ? "https://sandbox.zarinpal.com/pg/StartPay" : "https://www.zarinpal.com/pg/StartPay",

@@ -1,10 +1,16 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import { BsInstagram, BsPhone, BsWhatsapp } from "react-icons/bs";
+import { Phone, Smartphone } from "lucide-react";
+import { BsInstagram, BsWhatsapp } from "react-icons/bs";
 
-const defaults = { phone: "02166516492", whatsapp: "09127351124", instagram: "https://instagram.com/fermo_cafe", bale: "https://bale.ai/" };
+const defaults = { phone: "۰۲۱-۱۲۳۴۵۶۷۸", phoneMobile: "۰۹۱۲۷۳۵۱۱۲۴", whatsapp: "۰۹۱۲۷۳۵۱۱۲۴", instagram: "https://instagram.com/fermo_cafe", bale: "https://bale.ai/" };
 
+function toTelNumber(value: string) {
+  return value
+    .replace(/[۰-۹٠-٩]/g, (digit) => String(digit.charCodeAt(0) >= 0x06f0 ? digit.charCodeAt(0) - 0x06f0 : digit.charCodeAt(0) - 0x0660))
+    .replace(/[^\d+]/g, "");
+}
 export default function Contact() {
   const [settings, setSettings] = useState(defaults);
   useEffect(() => { fetch("/api/site-settings", { cache: "no-store" }).then((response) => response.json()).then((result) => setSettings((current) => ({ ...current, ...result.settings }))).catch(() => undefined); }, []);
@@ -21,19 +27,24 @@ export default function Contact() {
       <p className="text-gray-300 mb-5 sm:mb-8 text-sm sm:text-base">
         برای راه‌اندازی پروژه، مشاوره و آموزش با ما تماس بگیرید
       </p>
-      <div
-        className="flex flex-col md:flex-row justify-center items-center gap-5 sm:gap-8"
-      >
+      <div className="flex flex-col items-center justify-center gap-5 md:flex-row sm:gap-8">
         <div
           className="flex h-32 w-full max-w-xs flex-col items-center justify-center rounded-xl bg-gray-800 p-4 sm:h-36 sm:p-5"
         >
           <div className="flex items-center gap-2 mb-1 sm:mb-2">
-            <BsPhone className="w-6 h-6 text-yellow-400" />
+            <Phone className="h-6 w-6 text-yellow-400" aria-hidden="true" />
             <span className="text-yellow-400 font-bold text-base sm:text-lg">
               تلفن
             </span>
           </div>
-          <a href={`tel:${settings.phone}`} dir="ltr" className="text-gray-200 text-sm sm:text-base hover:text-[#d4af37]">{settings.phone}</a>
+          <a href={`tel:${toTelNumber(settings.phone)}`} dir="ltr" className="text-gray-200 text-sm sm:text-base hover:text-[#d4af37]">{settings.phone}</a>
+        </div>
+        <div className="flex h-32 w-full max-w-xs flex-col items-center justify-center rounded-xl bg-gray-800 p-4 sm:h-36 sm:p-5">
+          <div className="mb-1 flex items-center gap-2 sm:mb-2">
+            <Smartphone className="h-6 w-6 text-yellow-400" aria-hidden="true" />
+            <span className="text-base font-bold text-yellow-400 sm:text-lg">تلفن همراه (موبایل)</span>
+          </div>
+          <a href={`tel:${toTelNumber(settings.phoneMobile)}`} dir="ltr" className="text-sm text-gray-200 hover:text-[#d4af37] sm:text-base">{settings.phoneMobile}</a>
         </div>
         {/* WhatsApp */}
         <div

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 
-type ConfirmOptions = { title?: string; description?: string; confirmLabel?: string };
+type ConfirmOptions = { title?: string; description?: string; confirmLabel?: string; confirmTone?: "danger" | "primary" };
 
 type DialogState = ConfirmOptions & { resolve: (confirmed: boolean) => void };
 const ConfirmDialogContext = createContext<((options?: ConfirmOptions) => Promise<boolean>) | null>(null);
@@ -17,14 +17,14 @@ export function ConfirmDialogProvider({ children }: { children: React.ReactNode 
   return <ConfirmDialogContext.Provider value={confirm}>
     {children}
     {dialog && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/50 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(false); }}>
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-gray-950/50 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) close(false); }}>
       <div role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title" className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 text-right shadow-2xl">
-        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600"><span className="text-xl font-bold">!</span></div>
+        <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-full ${dialog.confirmTone === "primary" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-600"}`}><span className="text-xl font-bold">!</span></div>
         <h2 id="confirm-dialog-title" className="text-lg font-bold text-gray-900">{dialog.title || "تأیید عملیات"}</h2>
         <p className="mt-2 text-sm leading-6 text-gray-500">{dialog.description || "این عملیات قابل بازگشت نیست. آیا از ادامه مطمئن هستید؟"}</p>
         <div className="mt-6 flex justify-end gap-3">
           <button type="button" onClick={() => close(false)} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">انصراف</button>
-          <button type="button" onClick={() => close(true)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700">{dialog.confirmLabel || "حذف"}</button>
+          <button type="button" onClick={() => close(true)} className={`rounded-lg px-4 py-2 text-sm font-semibold text-white transition ${dialog.confirmTone === "primary" ? "bg-amber-600 hover:bg-amber-700" : "bg-red-600 hover:bg-red-700"}`}>{dialog.confirmLabel || "حذف"}</button>
         </div>
       </div>
     </div>

@@ -44,6 +44,9 @@ function validateLessons(input: unknown): { lessons?: ICourseLesson[]; error?: s
       order,
     });
   }
+  if (lessons.filter((lesson) => lesson.isFreePreview).length > 2) {
+    return { error: "حداکثر دو قسمت از هر دوره می‌تواند پیش‌نمایش رایگان باشد" };
+  }
   return { lessons };
 }
 
@@ -113,7 +116,12 @@ export async function PATCH(request: Request) {
   const result = validate(body);
   if (result.error || !result.values) return NextResponse.json({ error: result.error || "اطلاعات نامعتبر است" }, { status: 400 });
   await connectDB();
-  const course = await Course.findByIdAndUpdate(body.id, result.values, { returnDocument: "after", runValidators: true }).lean();
+  const existing = await Course.findById(body.id).select("slug").lean();
+  if (!existing) return NextResponse.json({ error: "دوره یافت نشد" }, { status: 404 });
+  const values = existing.slug === "free-course"
+    ? { ...result.values, price: 0, discountPercent: 0, isFree: true }
+    : result.values;
+  const course = await Course.findByIdAndUpdate(body.id, values, { returnDocument: "after", runValidators: true }).lean();
   if (!course) return NextResponse.json({ error: "دوره یافت نشد" }, { status: 404 });
   return NextResponse.json({ course: { ...course, lessons: course.lessons ?? [], discountedPrice: course.isFree ? 0 : Math.round(course.price * (1 - (course.discountPercent || 0) / 100)) } });
 }

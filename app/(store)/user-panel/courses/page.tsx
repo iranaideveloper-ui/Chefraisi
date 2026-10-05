@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import CourseLessonsDialog, { type CourseVideoLesson } from "@/components/CourseLessonsDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type Order = { orderId: string; userMobile: string; createdAt: string; items: { id: number; name: string; price: number; count: number }[] };
 type PlayerCourse = { id: number; title: string; isFree: boolean; lessons: CourseVideoLesson[] };
 
 export default function Courses() {
+  const notify = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ orderId: string; courseId: number } | null>(null);
@@ -46,10 +48,10 @@ export default function Courses() {
     try {
       const response = await fetch("/api/orders", { method: "DELETE", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ orderId, courseId }) });
       const result = await response.json();
-      if (!response.ok) { window.alert(result.error || "حذف دوره انجام نشد"); return; }
+      if (!response.ok) { notify(result.error || "حذف دوره انجام نشد", "error"); return; }
       setOrders((current) => current.map((order) => order.orderId === orderId ? { ...order, items: order.items.filter((item) => item.id !== courseId) } : order).filter((order) => order.items.length > 0));
     } catch {
-      window.alert("ارتباط با سرور برای حذف دوره برقرار نشد");
+      notify("ارتباط با سرور برای حذف دوره برقرار نشد", "error");
     } finally {
       setDeleting(null);
     }

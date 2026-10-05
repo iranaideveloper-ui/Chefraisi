@@ -9,18 +9,20 @@ import { defaultArticlePresentation, defaultArticles } from "@/lib/defaultArticl
 export const metadata: Metadata = {
   title: { absolute: "مقالات و آموزش‌ها | فراز برتر رامونا" },
   description:
-    "تازه‌ترین مقالات تخصصی فراز برتر رامونا درباره راه‌اندازی رستوران، آموزش آشپزی، طراحی منو و مدیریت کسب‌وکارهای غذایی.",
+    "مقالات تخصصی فراز برتر رامونا درباره راه‌اندازی رستوران، آموزش آشپزی، آیا می‌دانید، تجهیزات آشپزخانه، فرانچایز و مدیریت کسب‌وکار.",
   alternates: { canonical: "/articles" },
 };
 
-type Category = "restaurant-setup" | "cooking" | "menu-design" | "business";
-type StoredCategory = "launch" | "cooking" | "design" | "management";
+type Category = "restaurant-setup" | "cooking" | "did-you-know" | "business" | "kitchen-equipment" | "franchise";
+type StoredCategory = "launch" | "cooking" | "design" | "management" | "equipment" | "franchise";
 
 const categoryLabels: Record<StoredCategory, Category> = {
   launch: "restaurant-setup",
   cooking: "cooking",
-  design: "menu-design",
+  design: "did-you-know",
   management: "business",
+  equipment: "kitchen-equipment",
+  franchise: "franchise",
 };
 
 type Article = {
@@ -40,8 +42,10 @@ const categories: { slug: "all" | Category; label: string }[] = [
   { slug: "all", label: "همه" },
   { slug: "restaurant-setup", label: "راه‌اندازی رستوران" },
   { slug: "cooking", label: "آموزش آشپزی" },
-  { slug: "menu-design", label: "طراحی و منو" },
+  { slug: "did-you-know", label: "آیا می‌دانید" },
   { slug: "business", label: "مدیریت و بیزینس" },
+  { slug: "kitchen-equipment", label: "تجهیزات آشپزخانه" },
+  { slug: "franchise", label: "فرانچایز" },
 ];
 
 const fallbackArticles: Article[] = defaultArticles.map((article) => {
@@ -92,7 +96,8 @@ export default async function ArticlesPage({
   searchParams: SearchParams;
 }) {
   const [params, articles] = await Promise.all([searchParams, getArticles()]);
-  const requestedCategory = typeof params.category === "string" ? params.category : "all";
+  const rawCategory = typeof params.category === "string" ? params.category : "all";
+  const requestedCategory = rawCategory === "menu-design" ? "did-you-know" : rawCategory;
   const selectedCategory = categories.some(({ slug }) => slug === requestedCategory)
     ? requestedCategory
     : "all";
@@ -119,10 +124,10 @@ export default async function ArticlesPage({
             <span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4 text-[#d4af37]" />{selectedArticle.date}</span>
             <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-[#d4af37]" />{selectedArticle.readingTime} دقیقه مطالعه</span>
           </div>
-          <h1 className="mt-5 break-words text-2xl font-black leading-relaxed text-stone-100 sm:text-4xl">{selectedArticle.title}</h1>
-          <p className="mt-5 break-words border-r-2 border-[#d4af37] pr-4 text-base leading-8 text-stone-300">{selectedArticle.excerpt}</p>
-          <div className="mt-8 space-y-5 break-words text-sm leading-8 text-stone-300 sm:text-base sm:leading-9">
-            {selectedArticle.body.map((paragraph) => <p key={paragraph} className="break-words">{paragraph}</p>)}
+          <h1 className="mt-5 wrap-break-word text-2xl font-black leading-relaxed text-stone-100 sm:text-4xl">{selectedArticle.title}</h1>
+          <p className="mt-5 wrap-break-word border-r-2 border-[#d4af37] pr-4 text-base leading-8 text-stone-300">{selectedArticle.excerpt}</p>
+          <div className="mt-8 space-y-5 whitespace-pre-wrap wrap-break-word text-sm leading-8 text-stone-300 sm:text-base sm:leading-9">
+            {selectedArticle.body.map((paragraph) => <p key={paragraph} className="wrap-break-word">{paragraph}</p>)}
           </div>
         </article>
       </main>
@@ -131,12 +136,24 @@ export default async function ArticlesPage({
 
   return (
     <main className="viewport-min-height overflow-x-hidden bg-[#0a0a09] text-white selection:bg-[#d4af37] selection:text-[#0a0a09]">
-      <section className="relative isolate overflow-hidden border-b border-[#d4af37]/20 px-4 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-36">
+      <section className="relative isolate overflow-hidden border-b border-[#d4af37]/20 px-4 pb-10 pt-28 sm:px-8 sm:pb-8 sm:pt-28">
         <div className="pointer-events-none absolute -right-24 top-10 -z-10 h-72 w-72 rounded-full bg-[#d4af37]/7 blur-3xl" />
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-3 text-sm font-bold text-[#d4af37]">دانش برای کسب‌وکارهای غذایی</p>
-          <h1 className="max-w-3xl text-3xl font-black leading-relaxed text-stone-100 sm:text-4xl lg:text-5xl">مقالات و یادداشت‌های تخصصی</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400 sm:text-base sm:leading-8">تازه‌ترین مقالات در زمینه راه‌اندازی رستوران، آموزش آشپزی و اصول مدیریت کسب‌وکار</p>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="min-w-0 text-right">
+            <p className="mb-3 text-sm font-bold text-[#d4af37]">دانش برای کسب‌وکارهای غذایی</p>
+            <h1 className="max-w-3xl text-2xl font-black leading-relaxed text-stone-100 sm:text-3xl lg:text-4xl">مقالات و یادداشت‌های تخصصی</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-400 sm:text-base sm:leading-8">تازه‌ترین مقالات در زمینه راه‌اندازی رستوران، آموزش آشپزی و اصول مدیریت کسب‌وکار</p>
+          </div>
+          <div className="hidden justify-center lg:flex" aria-hidden="true">
+            <Image
+              src="/assets/images/faraz-logo.png"
+              alt=""
+              width={320}
+              height={320}
+              priority
+              className="h-56 w-56 object-contain xl:h-60 xl:w-60"
+            />
+          </div>
         </div>
       </section>
 
@@ -173,8 +190,8 @@ export default async function ArticlesPage({
                   <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 text-[#d4af37]" />{article.date}</span>
                   <span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5 text-[#d4af37]" />{article.readingTime} دقیقه مطالعه</span>
                 </div>
-                <h2 className="line-clamp-2 break-words text-lg font-extrabold leading-8 text-stone-100 transition-colors group-hover:text-[#f5d77d]">{article.title}</h2>
-                <p className="mt-2 line-clamp-3 break-words text-sm leading-7 text-stone-400">{article.excerpt}</p>
+                <h2 className="line-clamp-2 wrap-break-word text-lg font-extrabold leading-8 text-stone-100 transition-colors group-hover:text-[#f5d77d]">{article.title}</h2>
+                <p className="mt-2 line-clamp-3 wrap-break-word text-sm leading-7 text-stone-400">{article.excerpt}</p>
                 <Link href={`/articles?article=${article.slug}&category=${selectedCategory}`} className="mt-5 inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-[#d4af37] transition hover:gap-3 hover:text-[#f5d77d]">
                   مطالعه بیشتر <ArrowLeft className="h-4 w-4" />
                 </Link>

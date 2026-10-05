@@ -6,9 +6,9 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { HiOutlineClipboardDocumentList, HiOutlineUsers, HiOutlineBuildingOffice2, HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import AreaSalesChart from "@/components/admin/AreaSalesChart";
 
-type Stats = { users: number; consultations: number; pendingConsultations: number; registrations: number; launches: number; courses: number; successfulPayments: number; totalRevenue?: number };
+type Stats = { users?: number; consultations: number; pendingConsultations: number; registrations: number; projects: number; launches?: number; courses: number; successfulPayments?: number; paymentRevenue?: number; inboxComments?: number };
 type Consultation = { _id: string; name: string; family: string; consultationType: string; status: "pending" | "reviewed" | "referred"; createdAt: string };
-type DashboardData = { stats: Stats; consultationSeries: { label: string; sales: number }[]; recentConsultations: Consultation[] };
+type DashboardData = { role: "admin" | "super_admin"; stats: Stats; consultationSeries: { label: string; sales: number }[]; recentConsultations: Consultation[] };
 
 const formatNumber = (value: number) => value.toLocaleString("fa-IR");
 
@@ -34,11 +34,17 @@ export default function AdminDashboard() {
 
   const stats = data?.stats;
   const cards = stats ? [
-    { title: "کاربران ثبت‌نام‌شده", value: stats.users, href: "/admin/users", icon: HiOutlineUsers, tone: "text-sky-700" },
     { title: "ثبت‌نام دوره‌ها", value: stats.registrations, href: "/admin/courses", icon: HiOutlineClipboardDocumentList, tone: "text-green-700", detail: `${formatNumber(stats.courses)} دوره فعال` },
     { title: "درخواست‌های مشاوره", value: stats.consultations, href: "/admin/consultations", icon: HiOutlineUsers, tone: "text-amber-700", detail: `${formatNumber(stats.pendingConsultations)} در انتظار بررسی` },
-    { title: "راه‌اندازی‌های ثبت‌شده", value: stats.launches, href: "/admin/projects", icon: HiOutlineBuildingOffice2, tone: "text-indigo-700" },
+    { title: "پروژه‌های ثبت‌شده", value: stats.projects, href: "/admin/projects", icon: HiOutlineBuildingOffice2, tone: "text-indigo-700" },
+    ...(data?.role === "super_admin" ? [
+      { title: "راه‌اندازی‌های ثبت‌شده", value: stats.launches ?? 0, href: "/admin/reports", icon: HiOutlineBuildingOffice2, tone: "text-blue-700" },
+      { title: "پرداخت‌های موفق زرین‌پال", value: stats.successfulPayments ?? 0, href: "/admin/payments", icon: HiOutlineUsers, tone: "text-emerald-700", detail: `${formatNumber(stats.paymentRevenue ?? 0)} تومان مبلغ واقعی` },
+      { title: "یادداشت‌های صندوق", value: stats.inboxComments ?? 0, href: "/admin/inbox", icon: HiOutlineChatBubbleLeftRight, tone: "text-orange-700" },
+      { title: "کاربران ثبت‌نام‌شده", value: stats.users ?? 0, href: "/admin/users", icon: HiOutlineUsers, tone: "text-sky-700" },
+    ] : []),
   ] : [];
+  const isSuperAdmin = data?.role === "super_admin";
 
   return <div className="space-y-8">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold text-gray-800">داشبورد خدمات</h1><p className="mt-1 text-sm text-gray-500">نمای کلی عملکرد آموزش، راه‌اندازی و مشاوره</p></div><button onClick={loadDashboard} className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200"><RefreshCw className="h-4 w-4" />تازه‌سازی</button></div>
@@ -47,7 +53,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">{cards.map((card) => <Link key={card.title} href={card.href} className="group flex h-full"><StatCard title={card.title} value={formatNumber(card.value)} detail={card.detail} icon={<card.icon className={`h-8 w-8 ${card.tone}`} />} /></Link>)}</div>
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <section className="rounded-2xl bg-white p-6 shadow"><div className="mb-4 flex items-center justify-between"><div><h2 className="font-bold text-lg text-gray-700">روند درخواست‌های مشاوره</h2><p className="text-xs text-gray-500">هفت روز اخیر</p></div><HiOutlineChatBubbleLeftRight className="h-8 w-8 text-amber-600" /></div><AreaSalesChart data={data.consultationSeries} /></section>
-        <section className="rounded-2xl bg-white p-6 shadow"><div className="mb-4 flex items-center justify-between"><div><h2 className="font-bold text-lg text-gray-700">وضعیت عملیاتی</h2><p className="text-xs text-gray-500">شاخص‌های قابل پیگیری امروز</p></div><HiOutlineChatBubbleLeftRight className="h-8 w-8 text-[#d4af37]" /></div><div className="space-y-4 text-sm"><Metric label="کاربران ثبت‌نام‌شده" value={data.stats.users} /><Metric label="ثبت‌نام دوره‌ها" value={data.stats.registrations} /><Metric label="مشاوره‌های در انتظار" value={data.stats.pendingConsultations} /></div></section>
+        <section className="rounded-2xl bg-white p-6 shadow"><div className="mb-4 flex items-center justify-between"><div><h2 className="font-bold text-lg text-gray-700">وضعیت عملیاتی</h2><p className="text-xs text-gray-500">شاخص‌های قابل پیگیری امروز</p></div><HiOutlineChatBubbleLeftRight className="h-8 w-8 text-[#d4af37]" /></div><div className="space-y-4 text-sm">{isSuperAdmin && <Metric label="کاربران ثبت‌نام‌شده" value={data.stats.users ?? 0} />}<Metric label="ثبت‌نام دوره‌ها" value={data.stats.registrations} /><Metric label="پروژه‌های ثبت‌شده" value={data.stats.projects} /><Metric label="مشاوره‌های در انتظار" value={data.stats.pendingConsultations} />{isSuperAdmin && <><Metric label="پرداخت‌های موفق زرین‌پال" value={data.stats.successfulPayments ?? 0} /><Metric label="یادداشت‌های صندوق" value={data.stats.inboxComments ?? 0} /></>}</div></section>
       </div>
       <section className="rounded-2xl bg-white p-6 shadow"><div className="mb-4 flex items-center justify-between"><div><h2 className="font-bold text-lg text-gray-700">آخرین درخواست‌های مشاوره</h2><p className="text-xs text-gray-500">برای پیگیری به بخش درخواست‌های مشاوره بروید</p></div></div>{data.recentConsultations.length === 0 ? <p className="py-8 text-center text-gray-500">درخواستی ثبت نشده است.</p> : <div className="overflow-x-auto"><table className="w-full text-right text-sm"><thead><tr className="border-b bg-gray-50"><th className="p-3">متقاضی</th><th className="p-3">نوع درخواست</th><th className="p-3">وضعیت</th><th className="p-3">تاریخ</th></tr></thead><tbody>{data.recentConsultations.map((item) => <tr key={item._id} className="border-b last:border-0"><td className="p-3">{item.name} {item.family}</td><td className="p-3">{item.consultationType}</td><td className="p-3"><span className={item.status === "pending" ? "text-amber-700" : item.status === "referred" ? "text-blue-700" : "text-green-700"}>{item.status === "pending" ? "در انتظار بررسی" : item.status === "referred" ? "ارجاع‌شده به مدیریت پروژه‌ها" : "بررسی شده"}</span></td><td className="p-3">{new Date(item.createdAt).toLocaleDateString("fa-IR")}</td></tr>)}</tbody></table></div>}</section>
     </>}

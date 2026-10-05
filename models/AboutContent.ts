@@ -3,10 +3,10 @@ import mongoose, { Schema, models } from "mongoose";
 const AboutContentSchema = new Schema(
   {
     key: { type: String, unique: true, default: "about" },
-    heroTitle: { type: String, required: true, maxlength: 180 },
-    heroAccent: { type: String, required: true, maxlength: 120 },
-    heroDescription: { type: String, required: true, maxlength: 1000 },
-    supportText: { type: String, required: true, maxlength: 180 },
+    heroTitle: { type: String, required: true, maxlength: 30 },
+    heroAccent: { type: String, required: true, maxlength: 30 },
+    heroDescription: { type: String, required: true, maxlength: 140 },
+    supportText: { type: String, required: true, maxlength: 40 },
     supportLink: { type: String, required: true, maxlength: 500 },
     slides: [{ image: { type: String, required: true, maxlength: 500 }, label: { type: String, required: true, maxlength: 120 }, detail: { type: String, required: true, maxlength: 180 } }],
     highlights: [{ label: { type: String, required: true, maxlength: 180 } }],

@@ -73,7 +73,7 @@ export default function CardCarousel({ items, className = "" }: CardCarouselProp
           )}
         </div>
         <div className="mb-3 min-h-12 text-center">
-          {slide.isFree ? <><span className="block text-sm text-gray-400 line-through">{slide.price.toLocaleString("fa-IR")} تومان</span><span className="block text-[#d4af37] font-bold text-base sm:text-lg">رایگان</span></> : hasDiscount ? <><span className="block text-sm text-gray-400 line-through">{slide.price.toLocaleString("fa-IR")} تومان</span><span className="block text-[#d4af37] font-bold text-base sm:text-lg">{payablePrice.toLocaleString("fa-IR")} تومان</span></> : <span className="block text-[#d4af37] font-bold text-base sm:text-lg">{slide.price.toLocaleString("fa-IR")} تومان</span>}
+          {slide.comingSoon ? <span className="block text-[#d4af37] font-bold text-base sm:text-lg">به‌زودی</span> : slide.isFree ? <><span className="block text-sm text-gray-400 line-through">{slide.price.toLocaleString("fa-IR")} تومان</span><span className="block text-[#d4af37] font-bold text-base sm:text-lg">رایگان</span></> : hasDiscount ? <><span className="block text-sm text-gray-400 line-through">{slide.price.toLocaleString("fa-IR")} تومان</span><span className="block text-[#d4af37] font-bold text-base sm:text-lg">{payablePrice.toLocaleString("fa-IR")} تومان</span></> : <span className="block text-[#d4af37] font-bold text-base sm:text-lg">{slide.price.toLocaleString("fa-IR")} تومان</span>}
         </div>
         {slide.slug ? (
           slide.comingSoon ? (
@@ -102,7 +102,7 @@ export default function CardCarousel({ items, className = "" }: CardCarouselProp
 
   if (!isMounted) {
     return <>
-      <div className={`grid min-h-[32rem] grid-cols-1 gap-6 md:grid-cols-3 ${className}`}>{cards.slice(0, 3)}</div>
+      <div className={`grid min-h-128 grid-cols-1 gap-6 md:grid-cols-3 ${className}`}>{cards.slice(0, 3)}</div>
       {lessonCourse && <CourseLessonsDialog key={lessonCourse.id} courseTitle={lessonCourse.title} lessons={lessonCourse.lessons ?? []} access="preview" onClose={() => setLessonCourse(null)} />}
     </>;
   }

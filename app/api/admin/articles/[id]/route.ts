@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 import connectDB from "@/lib/mongodb";
 import Article from "@/models/Article";
 import { isDuplicateKeyError, validateArticleInput } from "@/lib/articleValidation";
-import { getAdminUser } from "@/lib/sessionUser";
+import { getSuperAdminUser } from "@/lib/sessionUser";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, { params }: RouteContext) {
-  if (!await getAdminUser("create")) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
+  if (!await getSuperAdminUser()) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
   const { id } = await params;
   if (!mongoose.isValidObjectId(id)) return NextResponse.json({ error: "شناسه مقاله نامعتبر است" }, { status: 400 });
   const body: unknown = await request.json().catch(() => null);
@@ -31,7 +31,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
-  if (!await getAdminUser("delete")) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
+  if (!await getSuperAdminUser()) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
   const { id } = await params;
   if (!mongoose.isValidObjectId(id)) return NextResponse.json({ error: "شناسه مقاله نامعتبر است" }, { status: 400 });
   try {

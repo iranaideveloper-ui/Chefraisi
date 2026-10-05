@@ -1,6 +1,8 @@
 import "./globals.css";
 import "../public/assets/css/main.css";
 import BottomNav from "../components/ui/BottomNav";
+import { ConfirmDialogProvider } from "@/components/admin/ConfirmDialog";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import type { Metadata, Viewport } from "next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -53,9 +55,13 @@ export default function RootLayout({
     <html lang="fa" dir="rtl" className="viewport-min-height overflow-x-hidden">
       {/* RESPONSIVE FIX: Prevent accidental horizontal overflow across mobile routes. */}
       <body className="viewport-min-height overflow-x-hidden antialiased" dir="rtl">
-        {children}
-        {/* Mobile bottom navigation */}
-        <BottomNav />
+        <ConfirmDialogProvider>
+          <ToastProvider>
+            {children}
+            {/* Mobile bottom navigation */}
+            <BottomNav />
+          </ToastProvider>
+        </ConfirmDialogProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

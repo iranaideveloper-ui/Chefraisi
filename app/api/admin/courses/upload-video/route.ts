@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/sessionUser";
+import { getCourseVideoStorageDirectory } from "@/lib/courseVideoStorage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,11 +43,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const uploadDirectory = path.join(process.cwd(), "public", "uploads", "videos");
+    const uploadDirectory = getCourseVideoStorageDirectory();
     await mkdir(uploadDirectory, { recursive: true });
     const filename = `${randomUUID()}${extension}`;
     await writeFile(path.join(uploadDirectory, filename), Buffer.from(await file.arrayBuffer()));
-    return NextResponse.json({ success: true, url: `/uploads/videos/${filename}` }, { status: 201 });
+    return NextResponse.json({ success: true, url: `/api/course-videos/${filename}` }, { status: 201 });
   } catch (error) {
     console.error("Course video upload failed:", error);
     return NextResponse.json({ error: "ذخیره فایل ویدیو انجام نشد" }, { status: 500 });

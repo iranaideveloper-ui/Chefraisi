@@ -8,6 +8,7 @@ import Chefs from "@/components/Chefs";
 import Gallery from "@/components/Gallery";
 import { getPublicCourses } from "@/lib/getCourses";
 import { getPublicLaunches } from "@/lib/getLaunches";
+import { getPublicDepartments } from "@/lib/getDepartments";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -19,7 +20,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [courses, launches] = await Promise.all([getPublicCourses(), getPublicLaunches()]);
+  const [courses, launches, departments] = await Promise.all([
+    getPublicCourses(),
+    getPublicLaunches(),
+    getPublicDepartments(),
+  ]);
 
   return (
     <div className="flex flex-col">
@@ -30,7 +35,7 @@ export default async function Home() {
       {/* <!-- گالری تصاویر --> */}
       <Gallery projects={launches} />
       {/* <!-- سرآشپزها --> */}
-      <Chefs />
+      <Chefs departments={departments} />
       {/* <!-- مزیت‌ها --> */}
       <Advantages />
       {/* <!-- تماس با ما --> */}

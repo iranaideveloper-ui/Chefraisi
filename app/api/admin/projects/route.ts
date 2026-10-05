@@ -31,7 +31,6 @@ export async function POST(request: Request) {
   if (!admin) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   if (!body) return NextResponse.json({ error: "بدنه درخواست نامعتبر است" }, { status: 400 });
-  if (!body.sourceConsultationId && admin.role !== "super_admin") return NextResponse.json({ error: "فقط مدیر ارشد امکان ایجاد پروژه را دارد" }, { status: 403 });
   const validation = validateProjectBody(body);
   if (validation.error) return NextResponse.json({ error: validation.error }, { status: 400 });
   if (!validation.values) return NextResponse.json({ error: "اطلاعات پروژه نامعتبر است" }, { status: 400 });

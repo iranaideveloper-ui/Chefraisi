@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   Instagram,
   Phone,
@@ -15,6 +16,7 @@ import {
 
 type SiteSettings = {
   phone: string;
+  phoneMobile: string;
   whatsapp: string;
   instagram: string;
   bale: string;
@@ -37,6 +39,7 @@ type SocialLink = {
 
 const fallbackSettings: SiteSettings = {
   phone: '02166516492',
+  phoneMobile: '09127351124',
   whatsapp: '09127351124',
   instagram: 'https://instagram.com/fermo_cafe',
   bale: 'https://bale.ai/',
@@ -46,7 +49,11 @@ const fallbackSettings: SiteSettings = {
   catalogPdfUrl: '',
 };
 
-function createSocialLinks(settings: SiteSettings): SocialLink[] {
+function toWesternDigits(value: string) {
+  return value.replace(/[۰-۹٠-٩]/g, (digit) => String(digit.charCodeAt(0) >= 0x06f0 ? digit.charCodeAt(0) - 0x06f0 : digit.charCodeAt(0) - 0x0660));
+}
+
+function createSocialLinks(settings: SiteSettings, notify: (message: string, kind?: 'success' | 'error' | 'info') => void): SocialLink[] {
   const instagramUrl = settings.instagramUrl || settings.instagram;
   const baleUrl = settings.baleUrl || settings.bale;
 
@@ -63,7 +70,7 @@ function createSocialLinks(settings: SiteSettings): SocialLink[] {
   {
     title: 'مشاوره آنلاین در واتس‌اپ',
     subtitle: 'ارتباط مستقیم با تیم پشتیبانی',
-    url: `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`,
+    url: `https://wa.me/${toWesternDigits(settings.whatsapp).replace(/\D/g, '')}`,
     icon: MessageCircle,
     color: 'hover:border-emerald-500/80 hover:bg-emerald-500/10',
     iconColor: 'text-emerald-400',
@@ -72,10 +79,19 @@ function createSocialLinks(settings: SiteSettings): SocialLink[] {
   {
     title: 'تماس تلفنی مستقیم',
     subtitle: 'پاسخگویی در ساعات کاری',
-    url: 'tel:02166516492',
+    url: `tel:${toWesternDigits(settings.phone).replace(/[^\d+]/g, '')}`,
     icon: Phone,
     color: 'hover:border-blue-500/80 hover:bg-blue-500/10',
     iconColor: 'text-blue-400',
+    isExternal: false,
+  },
+  {
+    title: 'تماس با تلفن همراه',
+    subtitle: 'تماس مستقیم با موبایل مجموعه',
+    url: `tel:${toWesternDigits(settings.phoneMobile).replace(/[^\d+]/g, '')}`,
+    icon: Phone,
+    color: 'hover:border-cyan-500/80 hover:bg-cyan-500/10',
+    iconColor: 'text-cyan-400',
     isExternal: false,
   },
   {
@@ -113,12 +129,13 @@ function createSocialLinks(settings: SiteSettings): SocialLink[] {
     color: 'hover:border-amber-400/80 hover:bg-amber-500/10',
     iconColor: 'text-amber-300',
     isExternal: Boolean(settings.catalogPdfUrl),
-    onClick: settings.catalogPdfUrl ? undefined : () => alert('فایل کاتالوگ در حال آماده‌سازی نهایی است.'),
+    onClick: settings.catalogPdfUrl ? undefined : () => notify('فایل کاتالوگ در حال آماده‌سازی نهایی است.', 'info'),
   },
   ];
 }
 
 export default function LinksPage() {
+  const notify = useToast();
   const [settings, setSettings] = useState<SiteSettings>(fallbackSettings);
 
   useEffect(() => {
@@ -131,7 +148,7 @@ export default function LinksPage() {
       .catch(() => undefined);
   }, []);
 
-  const socialLinks = createSocialLinks(settings);
+  const socialLinks = createSocialLinks(settings, notify);
 
   return (
     <main

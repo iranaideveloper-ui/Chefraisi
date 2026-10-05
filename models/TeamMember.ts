@@ -10,7 +10,10 @@ const TeamMemberSchema = new Schema(
       type: [String],
       required: true,
       default: [],
-      validate: { validator: (services: string[]) => services.length <= 3, message: "حداکثر سه خدمت مجاز است" },
+      validate: {
+        validator: (services: string[]) => services.length <= 4 && services.every((service) => service.length <= 80),
+        message: "حداکثر چهار خدمت با حداکثر ۸۰ نویسه برای هر عنوان مجاز است",
+      },
     },
   },
   { timestamps: true },

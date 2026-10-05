@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { MessageSquareText } from "lucide-react";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useAdminRole } from "@/components/admin/useAdminRole";
 
@@ -63,7 +64,7 @@ export default function AdminConsultations() {
   return <div className="flex flex-col gap-6">
     <section className="order-1 rounded-xl bg-white p-5 shadow">
       <div className="mb-5 flex items-center justify-between"><div><h1 className="text-2xl font-bold text-gray-800">درخواست‌های مشاوره</h1><p className="mt-1 text-sm text-gray-500">پیگیری درخواست‌ها و نتیجه تماس با مشتری</p></div><button onClick={load} className="rounded-lg bg-gray-100 px-4 py-2 text-sm">تازه‌سازی</button></div>
-      {loading ? <p>در حال بارگذاری...</p> : items.length === 0 ? <div className="rounded-xl p-10 text-center text-gray-500">درخواستی ثبت نشده است.</div> : <div className="space-y-4">{items.map((item) => <article key={item._id} className="rounded-xl border border-gray-100 p-5 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold text-gray-800">{displayText(item.name, "نام ثبت‌نشده")} {displayText(item.family, "نام خانوادگی ثبت‌نشده")}</h2><p className="text-sm text-gray-500" dir="ltr">{item.phone} | {item.email}</p></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${item.status === "pending" ? "bg-amber-100 text-amber-800" : item.status === "referred" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}>{item.status === "pending" ? "در انتظار بررسی" : item.status === "referred" ? "ارجاع‌شده به مدیریت پروژه‌ها" : "بررسی شده"}</span></div><div className="mt-4 grid gap-3 text-sm text-gray-600 sm:grid-cols-2"><p>نوع مشاوره: <strong>{displayText(item.consultationType, "نوع مشاوره ثبت‌نشده")}</strong></p><p>شماره حساب: <strong dir="ltr">{displayText(item.userMobile, "شماره ثبت‌نشده")}</strong></p><p>تاریخ: <strong>{new Date(item.createdAt).toLocaleDateString("fa-IR")}</strong></p></div><p className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">{displayText(item.description, "توضیحی ثبت نشده است.")}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => updateStatus(item._id, "reviewed")} className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white">تماس گرفته شد و بررسی شد</button><button onClick={() => updateStatus(item._id, "referred")} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ارجاع به مدیریت پروژه‌ها</button>{isSuperAdmin && <button onClick={() => deleteConsultation(item._id)} className="rounded-lg bg-red-50 px-4 py-2 text-sm font-bold text-red-700">حذف درخواست</button>}</div></article>)}</div>}
+      {loading ? <p>در حال بارگذاری...</p> : items.length === 0 ? <div className="rounded-xl p-10 text-center text-gray-500">درخواستی ثبت نشده است.</div> : <div className="space-y-4">{items.map((item) => <article key={item._id} className="rounded-xl border border-gray-100 p-5 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-bold text-gray-800">{displayText(item.name, "نام ثبت‌نشده")} {displayText(item.family, "نام خانوادگی ثبت‌نشده")}</h2><p className="text-sm text-gray-500" dir="ltr">{item.phone} | {item.email}</p></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${item.status === "pending" ? "bg-amber-100 text-amber-800" : item.status === "referred" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}>{item.status === "pending" ? "در انتظار بررسی" : item.status === "referred" ? "ارجاع‌شده به مدیریت پروژه‌ها" : "بررسی شده"}</span></div><div className="mt-4 grid gap-3 text-sm text-gray-600 sm:grid-cols-2"><p>نوع مشاوره: <strong>{displayText(item.consultationType, "نوع مشاوره ثبت‌نشده")}</strong></p><p>شماره حساب: <strong dir="ltr">{displayText(item.userMobile, "شماره ثبت‌نشده")}</strong></p><p>تاریخ: <strong>{new Date(item.createdAt).toLocaleDateString("fa-IR")}</strong></p></div><p className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">{displayText(item.description, "توضیحی ثبت نشده است.")}</p><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => updateStatus(item._id, "reviewed")} className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white">تماس گرفته شد و بررسی شد</button><button onClick={() => updateStatus(item._id, "referred")} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">ارجاع به مدیریت پروژه‌ها</button>{isSuperAdmin && <button onClick={() => deleteConsultation(item._id)} className="rounded-lg bg-red-50 px-4 py-2 text-sm font-bold text-red-700">حذف درخواست</button>}</div><AdminCommentComposer consultationId={item._id} /></article>)}</div>}
     </section>
 
     <section className="order-2 rounded-xl bg-white p-5 shadow">
@@ -71,5 +72,52 @@ export default function AdminConsultations() {
       <div className="space-y-4">{services.map((service, index) => <div key={index} className="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"><label className="text-sm font-semibold text-gray-700">عنوان خدمت<input value={service.title} onChange={(event) => updateService(index, "title", event.target.value)} className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 font-normal" /></label><label className="text-sm font-semibold text-gray-700">توضیح خدمت<textarea value={service.description} onChange={(event) => updateService(index, "description", event.target.value)} rows={2} className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 font-normal" /></label></div>)}</div>
       <div className="mt-4 flex flex-wrap items-center gap-3"><button type="button" onClick={saveServices} disabled={savingServices || services.length !== 5} className="rounded-lg bg-green-600 px-5 py-2 text-sm font-bold text-white disabled:opacity-50">{savingServices ? "در حال ذخیره..." : "ذخیره خدمات مشاوره"}</button>{serviceMessage && <span className="text-sm text-blue-700">{serviceMessage}</span>}</div>
     </section>
+  </div>;
+}
+
+function AdminCommentComposer({ consultationId }: { consultationId: string }) {
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ text: string; success: boolean } | null>(null);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/admin/consultation-comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ consultationId, comment }),
+      });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || "ثبت یادداشت انجام نشد");
+      setComment("");
+      setOpen(false);
+      setMessage({ text: "یادداشت در صندوق مدیران ثبت شد.", success: true });
+    } catch (error) {
+      setMessage({ text: error instanceof Error ? error.message : "ثبت یادداشت انجام نشد", success: false });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <div className="mt-3">
+    <button type="button" onClick={() => { setOpen((current) => !current); setMessage(null); }} aria-expanded={open} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-[#d4af37] hover:bg-amber-50">
+      <MessageSquareText className="h-4 w-4" /> {open ? "بستن یادداشت" : "ثبت یادداشت داخلی"}
+    </button>
+    {open && <form onSubmit={submit} className="mt-3 space-y-3 rounded-lg border border-amber-100 bg-amber-50/60 p-3">
+      <label className="block text-sm font-semibold text-gray-700">یادداشت برای صندوق مدیران
+        <textarea value={comment} onChange={(event) => setComment(event.target.value)} maxLength={2000} rows={4} required className="mt-1 block w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal outline-none focus:border-[#d4af37]" />
+        <span className="mt-1 block text-left text-xs text-gray-500" dir="ltr">{comment.length}/2000</span>
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="submit" disabled={saving || !comment.trim()} className="min-h-10 rounded-lg bg-gray-800 px-4 py-2 text-sm font-bold text-white disabled:cursor-wait disabled:opacity-50">{saving ? "در حال ثبت..." : "ارسال یادداشت"}</button>
+        <button type="button" onClick={() => { setOpen(false); setComment(""); }} disabled={saving} className="min-h-10 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 disabled:opacity-50">انصراف</button>
+      </div>
+    </form>}
+    {message && <p role="status" className={`mt-2 text-sm ${message.success ? "text-green-700" : "text-red-700"}`}>{message.text}</p>}
   </div>;
 }

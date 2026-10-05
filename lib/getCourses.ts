@@ -70,16 +70,18 @@ export async function getPublicCourses(): Promise<PublicCourse[]> {
         ? storedDescription.replace(/؛\s*به‌زودی منتشر می‌شود\.?$/, "")
         : storedDescription;
       const storedPrice = stored && Number.isFinite(stored.price) ? stored.price : fallback.price;
-      const price = comingSoon ? 0 : storedPrice;
+      const isFree = fallback.slug === "free-course" || Boolean(stored?.isFree ?? fallback.isFree);
+      const price = comingSoon || isFree ? 0 : storedPrice;
+      const discountPercent = isFree ? 0 : stored?.discountPercent ?? 0;
       return {
         ...fallback,
         image: stored && isUsableText(stored.image) ? stored.image : fallback.image,
         title: stored && isUsableText(stored.title) ? stored.title : fallback.title,
         description,
         price,
-        discountPercent: stored?.discountPercent ?? 0,
-        discountedPrice: stored?.isFree || fallback.isFree ? 0 : Math.round(price * (1 - (stored?.discountPercent ?? 0) / 100)),
-        isFree: stored?.isFree ?? fallback.isFree,
+        discountPercent,
+        discountedPrice: isFree ? 0 : Math.round(price * (1 - discountPercent / 100)),
+        isFree,
         comingSoon,
         lessons: (stored?.lessons ?? []).map((lesson) => ({
           title: lesson.title,

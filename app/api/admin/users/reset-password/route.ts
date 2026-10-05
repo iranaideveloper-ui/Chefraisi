@@ -4,21 +4,10 @@ import { randomInt } from "node:crypto";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import { getSessionUser } from "@/lib/sessionUser";
+import { sendTemporaryPassword } from "@/lib/passwordReset";
 
 function createTemporaryPassword() {
   return String(randomInt(10000000, 100000000));
-}
-
-async function sendPasswordSms(mobile: string, password: string) {
-  const apiUrl = process.env.SMS_API_URL;
-  const apiKey = process.env.SMS_API_KEY;
-  if (!apiUrl || !apiKey) return false;
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ mobile, message: `رمز عبور جدید شما: ${password}` }),
-  });
-  return response.ok;
 }
 
 export async function POST(request: Request) {
@@ -31,13 +20,14 @@ export async function POST(request: Request) {
   const user = await User.findById(body.id).select("mobile");
   if (!user) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 });
   const temporaryPassword = createTemporaryPassword();
+  try {
+    await sendTemporaryPassword(user.mobile, temporaryPassword);
+  } catch (error) {
+    console.error("Admin password reset SMS delivery failed:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ success: false, error: "پیامک ارسال نشد؛ رمز عبور تغییر نکرد. تنظیمات ملی‌پیامک را بررسی کنید." }, { status: 503 });
+  }
+
   user.password = await bcrypt.hash(temporaryPassword, 12);
   await user.save();
-
-  try {
-    const smsSent = await sendPasswordSms(user.mobile, temporaryPassword);
-    return NextResponse.json({ success: true, smsSent, message: smsSent ? "رمز جدید به شماره همراه کاربر ارسال شد" : "رمز تغییر کرد؛ تنظیمات سرویس پیامک کامل نشده است" });
-  } catch {
-    return NextResponse.json({ success: true, smsSent: false, message: "رمز تغییر کرد اما ارسال پیامک ناموفق بود" });
-  }
+  return NextResponse.json({ success: true, smsSent: true, message: "رمز جدید به شماره همراه کاربر ارسال شد" });
 }

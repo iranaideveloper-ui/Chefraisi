@@ -10,8 +10,11 @@ import type { FixedCourseViewData } from "@/components/FixedCourseViewer";
 
 type PageProps = { params: Promise<{ slug: string }> };
 type StoredCourse = {
+  title?: string;
+  description?: string;
   image: string;
   price: number;
+  isFree?: boolean;
   comingSoon?: boolean;
   lessons: Array<{
     _id?: unknown;
@@ -26,7 +29,14 @@ type StoredCourse = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const course = fixedCourses.find((item) => item.slug === slug);
-  return course ? { title: course.title, description: course.description } : { title: "دوره یافت نشد" };
+  if (!course) return { title: "دوره یافت نشد" };
+  try {
+    await connectDB();
+    const stored = await Course.findOne({ slug }).select("title description").lean();
+    return { title: stored?.title || course.title, description: stored?.description || course.description };
+  } catch {
+    return { title: course.title, description: course.description };
+  }
 }
 
 export default async function FixedCoursePage({ params }: PageProps) {
@@ -36,19 +46,25 @@ export default async function FixedCoursePage({ params }: PageProps) {
 
   let storedCourse: StoredCourse | null = null;
   let purchased = false;
+  let isFree = definition.isFree === true;
   try {
     await connectDB();
     const stored = await Course.findOne({ slug: definition.slug }).lean();
-    storedCourse = stored ? { image: stored.image, price: stored.price, comingSoon: stored.comingSoon, lessons: stored.lessons } : null;
+    storedCourse = stored ? { title: stored.title, description: stored.description, image: stored.image, price: stored.price, isFree: stored.isFree, comingSoon: stored.comingSoon, lessons: stored.lessons } : null;
+    isFree = storedCourse?.isFree ?? isFree;
     const user = await getSessionUser();
-    if (user && definition.slug === "restaurant-management") {
-      purchased = Boolean(await Order.exists({ userId: user._id, status: "paid", "items.id": definition.id }));
+    if (user && !isFree) {
+      purchased = Boolean(await Order.exists({
+        userId: user._id,
+        status: "paid",
+        "items.id": definition.id,
+      }));
     }
   } catch {
     storedCourse = null;
   }
 
-  const hasFullAccess = definition.isFree === true || purchased;
+  const hasFullAccess = isFree || purchased;
   const comingSoon = storedCourse?.comingSoon ?? definition.comingSoon ?? false;
   const lessons = (storedCourse?.lessons ?? []).map((lesson) => ({
     _id: String(lesson._id),
@@ -62,11 +78,11 @@ export default async function FixedCoursePage({ params }: PageProps) {
   const course: FixedCourseViewData = {
     id: definition.id,
     slug: definition.slug,
-    title: definition.title,
-    description: definition.description,
+    title: storedCourse?.title || definition.title,
+    description: storedCourse?.description || definition.description,
     image: storedCourse?.image || definition.image,
     price: comingSoon ? 0 : storedCourse?.price ?? definition.price,
-    isFree: definition.slug === "free-course",
+    isFree,
     comingSoon,
     purchased,
     lessons,

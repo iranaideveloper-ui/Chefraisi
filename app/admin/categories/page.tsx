@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useRef } from "react";
 import { useConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 type Category = {
   id: string;
@@ -21,6 +22,7 @@ type Food = {
 
 export default function CategoriesPage() {
   const confirm = useConfirmDialog();
+  const notify = useToast();
   const [categories, setCategories] = useState<Category[]>([
     { id: "c1", name: "پیتزا", parentId: null, description: "انواع پیتزا" },
     { id: "c2", name: "پاستا", parentId: null, description: "پاستاها و نودل" },
@@ -74,7 +76,7 @@ export default function CategoriesPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return alert("لطفا نام دسته‌بندی را وارد کنید");
+    if (!name.trim()) { notify("لطفا نام دسته‌بندی را وارد کنید", "error"); return; }
 
     setIsSubmitting(true);
 
@@ -112,7 +114,7 @@ export default function CategoriesPage() {
   async function handleDelete(cat: Category) {
     // simple check: prevent deleting parent when children exist
     const hasChildren = categories.some((c) => c.parentId === cat.id);
-    if (hasChildren) return alert("ابتدا زیردسته‌ها را حذف یا منتقل کنید.");
+    if (hasChildren) { notify("ابتدا زیردسته‌ها را حذف یا منتقل کنید.", "error"); return; }
     if (!await confirm({ title: "حذف دسته‌بندی", description: "این دسته‌بندی حذف می‌شود و امکان بازگردانی آن وجود ندارد." })) return;
     setCategories((s) => s.filter((c) => c.id !== cat.id));
   }

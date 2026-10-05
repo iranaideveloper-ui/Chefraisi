@@ -37,7 +37,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         return;
       }
       const isAdminUser = result.user.role === "admin" || result.user.role === "super_admin";
-      window.location.assign(isAdminUser ? "/admin" : "/user-panel");
+      window.location.assign(isAdminUser ? result.user.role === "super_admin" ? "/admin" : "/admin/manager" : "/user-panel");
     } catch (err) {
       console.error("Login error:", err);
       setError("خطا در ورود به سیستم. لطفا دوباره تلاش کنید.");
@@ -50,7 +50,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     <div className="w-full">
       <div className="block mb-6 text-center">
         <h1 className="text-xl sm:text-2xl font-bold text-[#d4af37]">
-          ورود به کافه فراز برتر رامونا
+          ورود به فراز برتر رامونا
         </h1>
       </div>
 

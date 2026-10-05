@@ -110,8 +110,9 @@ export default function AdminContent() {
       credentials: "include",
       body: JSON.stringify({
         ...form,
-        price: Number(form.price),
-        discountPercent: Number(form.discountPercent),
+        price: selectedSlug === "free-course" ? 0 : Number(form.price),
+        discountPercent: selectedSlug === "free-course" ? 0 : Number(form.discountPercent),
+        ...(selectedSlug === "free-course" ? { isFree: true } : {}),
         id: editingId,
       }),
     });
@@ -164,9 +165,10 @@ export default function AdminContent() {
             </p>
           </div>
         </div>
-        <nav aria-label="دوره‌های ثابت" role="tablist" className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <nav aria-label="دوره‌های ثابت" role="tablist" className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {fixedCourses.map((fixed) => {
             const active = selectedSlug === fixed.slug;
+            const currentCourseTitle = courses.find((course) => course.slug === fixed.slug)?.title;
             return (
               <button
                 key={fixed.slug}
@@ -180,7 +182,7 @@ export default function AdminContent() {
                 }}
                 className={`min-h-11 rounded-lg border px-3 py-2 text-sm font-semibold transition ${active ? "border-[#d4af37] bg-[#d4af37] text-gray-950" : "border-gray-200 bg-white text-gray-700 hover:border-[#d4af37]"}`}
               >
-                {fixed.slug === "free-course" ? "دوره رایگان" : fixed.slug === "restaurant-management" ? "دوره مدیریت رستوران" : "دوره مستر شف"}
+                {currentCourseTitle || fixed.title}
               </button>
             );
           })}
@@ -192,6 +194,7 @@ export default function AdminContent() {
             onSubmit={saveCourse}
             saving={saving}
             editing={Boolean(editingId)}
+            isFreeCourse={selectedSlug === "free-course"}
           />
         )}
         {message && (
@@ -270,12 +273,14 @@ function CourseForm({
   onSubmit,
   saving,
   editing,
+  isFreeCourse,
 }: {
   form: CourseForm;
   update: (field: keyof CourseForm, value: string | boolean | CourseLesson[]) => void;
   onSubmit: (event: FormEvent) => void;
   saving: boolean;
   editing: boolean;
+  isFreeCourse: boolean;
 }) {
   const [lessonTitle, setLessonTitle] = useState("");
   const [lessonDuration, setLessonDuration] = useState("");
@@ -287,6 +292,7 @@ function CourseForm({
   const [videoUploadError, setVideoUploadError] = useState("");
   const lessonVideoInputRef = useRef<HTMLInputElement>(null);
   const [previewLessons, setPreviewLessons] = useState<CourseVideoLesson[] | null>(null);
+  const freePreviewCount = form.lessons.filter((lesson) => lesson.isFreePreview).length;
 
   const uploadLessonVideo = async (file: File): Promise<string | null> => {
     setVideoUploadError("");
@@ -345,6 +351,10 @@ function CourseForm({
     const title = lessonTitle.trim();
     let videoUrl = lessonVideoUrl.trim();
     if (!title || (!lessonVideoFile && !videoUrl)) return;
+    if (lessonFreePreview && freePreviewCount >= 2) {
+      setVideoUploadError("حداکثر دو قسمت از هر دوره می‌تواند پیش‌نمایش رایگان باشد.");
+      return;
+    }
     if (!videoUrl && lessonVideoFile) {
       videoUrl = (await uploadLessonVideo(lessonVideoFile)) ?? "";
     }
@@ -384,32 +394,36 @@ function CourseForm({
         />
         <span className="mt-1 block text-xs text-neutral-400">{form.title.length}/90</span>
       </label>
-      <label className="text-sm font-semibold text-gray-700">
-        قیمت اصلی به تومان
-        <input
-          required={!form.isFree}
-          type="number"
-          min={form.isFree || form.comingSoon ? "0" : "1"}
-          value={form.price}
-          onChange={(event) => update("price", event.target.value)}
-          className={inputClass}
-        />
-      </label>
-      <label className="text-sm font-semibold text-gray-700">
-        درصد تخفیف
-        <input
-          type="number"
-          min="0"
-          max="99"
-          step="1"
-          value={form.discountPercent}
-          onChange={(event) => update("discountPercent", event.target.value)}
-          className={inputClass}
-        />
-        <span className="mt-1 block text-xs text-gray-500">
-          بین ۰ تا ۹۹ درصد؛ قیمت نهایی در سایت خودکار محاسبه می‌شود.
-        </span>
-      </label>
+      {!isFreeCourse && (
+        <>
+          <label className="text-sm font-semibold text-gray-700">
+            قیمت اصلی به تومان
+            <input
+              required={!form.isFree}
+              type="number"
+              min={form.isFree || form.comingSoon ? "0" : "1"}
+              value={form.price}
+              onChange={(event) => update("price", event.target.value)}
+              className={inputClass}
+            />
+          </label>
+          <label className="text-sm font-semibold text-gray-700">
+            درصد تخفیف
+            <input
+              type="number"
+              min="0"
+              max="99"
+              step="1"
+              value={form.discountPercent}
+              onChange={(event) => update("discountPercent", event.target.value)}
+              className={inputClass}
+            />
+            <span className="mt-1 block text-xs text-gray-500">
+              بین ۰ تا ۹۹ درصد؛ قیمت نهایی در سایت خودکار محاسبه می‌شود.
+            </span>
+          </label>
+        </>
+      )}
       <label className="text-sm font-semibold text-gray-700 sm:col-span-2">
         توضیحات دوره
         <textarea
@@ -446,6 +460,7 @@ function CourseForm({
         <input
           type="checkbox"
           checked={form.isFree}
+          disabled={isFreeCourse}
           onChange={(event) => update("isFree", event.target.checked)}
         />{" "}
         دوره رایگان است
@@ -461,19 +476,33 @@ function CourseForm({
       <section className="space-y-4 rounded-lg border border-blue-100 bg-white/70 p-4 sm:col-span-2">
         <div>
           <h3 className="font-bold text-gray-800">مدیریت قسمت‌ها و ویدیوهای دوره</h3>
-          <p className="mt-1 text-xs text-gray-500">قسمت‌های ثبت‌شده همراه با دوره ذخیره می‌شوند.</p>
+          <p className="mt-1 text-xs leading-6 text-gray-500">حداکثر دو قسمت را برای پیش‌نمایش رایگان انتخاب کنید؛ ویدیوهای بارگذاری‌شده پس از بررسی دسترسی پخش می‌شوند. لینک‌های خارجی را فقط برای محتوای عمومی به‌کار ببرید. در استقرار production، مسیر COURSE_VIDEO_STORAGE_DIR را روی فضای خصوصی و پایدار سرور تنظیم کنید.</p>
         </div>
         {form.lessons.length > 0 && (
           <div className="space-y-2">
             {form.lessons.map((lesson, index) => (
               <div key={lesson._id ?? `${lesson.title}-${index}`} className="flex flex-wrap items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 p-3">
                 <div className="min-w-0 flex-1">
-                  <p className="break-words text-sm font-semibold text-gray-800">{index + 1}. {lesson.title}</p>
+                  <p className="wrap-break-word text-sm font-semibold text-gray-800">{index + 1}. {lesson.title}</p>
                   <p className="mt-1 break-all text-xs text-gray-500" dir="ltr">{lesson.videoUrl}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {lesson.duration && <span className="text-xs text-gray-500">{lesson.duration}</span>}
                   {lesson.isFreePreview && <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">پیش‌نمایش رایگان</span>}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!lesson.isFreePreview && freePreviewCount >= 2) {
+                        setVideoUploadError("حداکثر دو قسمت از هر دوره می‌تواند پیش‌نمایش رایگان باشد.");
+                        return;
+                      }
+                      setVideoUploadError("");
+                      update("lessons", form.lessons.map((item, lessonIndex) => lessonIndex === index ? { ...item, isFreePreview: !item.isFreePreview } : item));
+                    }}
+                    className="min-h-9 rounded border border-green-200 px-3 py-1 text-xs font-semibold text-green-700 hover:bg-green-50"
+                  >
+                    {lesson.isFreePreview ? "لغو پیش‌نمایش" : "فعال‌سازی پیش‌نمایش"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => setPreviewLessons([lesson])}
@@ -534,9 +563,10 @@ function CourseForm({
               {lessonFileName ? `✓ ویدیو انتخاب شد: ${lessonFileName}` : "فایلی انتخاب نشده است"}
             </span>
             <label className="inline-flex min-h-10 items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" checked={lessonFreePreview} onChange={(event) => setLessonFreePreview(event.target.checked)} className="h-4 w-4 accent-[#d4af37]" />
+              <input type="checkbox" checked={lessonFreePreview} disabled={!lessonFreePreview && freePreviewCount >= 2} onChange={(event) => setLessonFreePreview(event.target.checked)} className="h-4 w-4 accent-[#d4af37] disabled:cursor-not-allowed disabled:opacity-50" />
               پیش‌نمایش رایگان (مشاهده بدون خرید)
             </label>
+            <span className="text-xs text-gray-500">پیش‌نمایش‌های انتخاب‌شده: {freePreviewCount}/2</span>
             <button type="button" onClick={() => void addLesson()} disabled={isUploadingLesson || !lessonTitle.trim() || (!lessonVideoFile && !lessonVideoUrl.trim())} className="min-h-10 rounded bg-[#d4af37] px-4 py-2 text-sm font-bold text-gray-950 hover:bg-[#c5a12e] disabled:cursor-not-allowed disabled:opacity-50">
               + افزودن قسمت به دوره
             </button>

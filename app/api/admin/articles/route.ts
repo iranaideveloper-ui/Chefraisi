@@ -16,7 +16,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!await getAdminUser("create")) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
+  const admin = await getAdminUser("create");
+  if (!admin) return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
   const body: unknown = await request.json().catch(() => null);
   const validation = validateArticleInput(body);
   if (validation.error || !validation.data) {
@@ -32,7 +33,11 @@ export async function POST(request: Request) {
       slug = `${createArticleSlug(validation.data.slug).slice(0, 220 - suffixText.length)}${suffixText}`;
       suffix += 1;
     }
-    const article = await Article.create({ ...validation.data, slug });
+    const article = await Article.create({
+      ...validation.data,
+      slug,
+      published: admin.role === "super_admin" && validation.data.published,
+    });
     return NextResponse.json({ article: { ...article.toObject(), _id: String(article._id) } }, { status: 201 });
   } catch (error) {
     if (isDuplicateKeyError(error)) {

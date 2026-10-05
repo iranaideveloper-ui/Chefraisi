@@ -20,13 +20,13 @@ function mergeWithDefaults(value: Record<string, unknown>) {
 
 function validateContentLengths(value: Record<string, unknown>): string | null {
   const checks: Array<{ value: unknown; max: number; label: string }> = [
-    { value: value.heroTitle, max: 80, label: "عنوان اصلی" },
-    { value: value.heroAccent, max: 80, label: "عنوان طلایی" },
-    { value: value.supportText, max: 80, label: "متن پشتیبانی" },
+    { value: value.heroTitle, max: 30, label: "عنوان اصلی" },
+    { value: value.heroAccent, max: 30, label: "عنوان طلایی" },
+    { value: value.supportText, max: 40, label: "متن لینک پشتیبانی" },
     { value: value.processTitle, max: 80, label: "عنوان روش همکاری" },
     { value: value.ctaTitle, max: 80, label: "عنوان پایانی" },
     { value: value.ctaButton, max: 80, label: "متن دکمه پایانی" },
-    { value: value.heroDescription, max: 250, label: "متن معرفی" },
+    { value: value.heroDescription, max: 140, label: "متن معرفی" },
     { value: value.ctaDescription, max: 250, label: "توضیح پایانی" },
     { value: value.processDescription, max: 2500, label: "متن اصلی" },
   ];

@@ -8,6 +8,7 @@ export default function AdminSettings() {
     siteName: 'فراز برتر رامونا',
     siteDescription: 'مشاوره، طراحی، آموزش و راه‌اندازی رستوران‌ها صفر تا صد',
     phone: '۰۲۱-۱۲۳۴۵۶۷۸',
+    phoneMobile: '۰۹۱۲۷۳۵۱۱۲۴',
     email: 'info@farazbetar.ir',
     address: 'تهران، خیابان ولیعصر',
     instagram: 'https://instagram.com/farazbetar',
@@ -205,11 +206,11 @@ export default function AdminSettings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">واتس‌اپ</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">تلفن همراه (موبایل)</label>
               <input
                 type="tel"
-                value={settings.whatsapp}
-                onChange={(e) => handleChange('whatsapp', e.target.value)}
+                value={settings.phoneMobile}
+                onChange={(e) => handleChange('phoneMobile', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>

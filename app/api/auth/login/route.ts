@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendMelliPayamakSms } from "@/lib/passwordReset";
 
 export const runtime = "nodejs";
 
@@ -77,6 +78,18 @@ export async function POST(req: Request) {
       maxAge,
       path: "/",
     });
+
+    if (panelType === "admin" && user.role === "super_admin") {
+      const superAdminMobile = user.mobile;
+      after(async () => {
+        try {
+          const loginTime = new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+          await sendMelliPayamakSms(superAdminMobile, `ورود موفق به پنل مدیر ارشد فراز برتر رامونا | زمان: ${loginTime}`);
+        } catch (error) {
+          console.error("Super-admin login SMS notification failed:", error instanceof Error ? error.message : error);
+        }
+      });
+    }
 
     return res;
   } catch (error) {
