@@ -38,10 +38,10 @@ export async function PUT(request: Request) {
   const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
   if (newPassword && newPassword.length < 6) return NextResponse.json({ error: "رمز عبور باید حداقل ۶ کاراکتر باشد" }, { status: 400 });
   await connectDB();
-  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, ...optionalValues, ...(phoneMobile !== undefined ? { phoneMobile } : {}), key: "site" } }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
+  const settings = await SiteSettings.findOneAndUpdate({ key: "site" }, { $set: { ...values, ...optionalValues, ...(phoneMobile !== undefined ? { phoneMobile } : {}), key: "site" } }, { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }).lean();
   if (newPassword) adminUpdates.password = await bcrypt.hash(newPassword, 10);
   try {
-    const updatedAdmin = await User.findOneAndUpdate({ role: "super_admin", _id: admin._id }, { $set: adminUpdates }, { new: true, runValidators: true }).select("firstName lastName mobile").lean();
+    const updatedAdmin = await User.findOneAndUpdate({ role: "super_admin", _id: admin._id }, { $set: adminUpdates }, { returnDocument: "after", runValidators: true }).select("firstName lastName mobile").lean();
     if (!updatedAdmin) return NextResponse.json({ error: "مدیر ارشد یافت نشد" }, { status: 404 });
     return NextResponse.json({ settings, admin: updatedAdmin });
   } catch (error) {

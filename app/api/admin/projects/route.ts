@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     const projectData = sourceConsultationId ? { ...validation.values, ...optionalCardData, sourceConsultationId } : { ...validation.values, ...optionalCardData };
     const project = await Project.create(projectData);
     if (sourceConsultationId) {
-      const linkedConsultation = await Consultation.findOneAndUpdate({ _id: sourceConsultationId, status: "referred", projectId: null }, { projectId: project._id }, { new: true }).lean();
+      const linkedConsultation = await Consultation.findOneAndUpdate({ _id: sourceConsultationId, status: "referred", projectId: null }, { projectId: project._id }, { returnDocument: "after" }).lean();
       if (!linkedConsultation) {
         await Project.findByIdAndDelete(project._id);
         return NextResponse.json({ error: "درخواست هم‌زمان توسط کاربر دیگری ثبت شد" }, { status: 409 });
@@ -89,7 +89,7 @@ export async function PATCH(request: Request) {
     ...(typeof body.image === "string" && body.image.trim() ? { image: body.image.trim() } : {}),
     ...(Array.isArray(body.servicesProvided) ? { servicesProvided: body.servicesProvided.filter((service): service is string => typeof service === "string" && Boolean(service.trim())).map((service) => service.trim()) } : {}),
   };
-  const project = await Project.findByIdAndUpdate(body.id, { ...validation.values, ...optionalCardData }, { new: true, runValidators: true }).lean();
+  const project = await Project.findByIdAndUpdate(body.id, { ...validation.values, ...optionalCardData }, { returnDocument: "after", runValidators: true }).lean();
   if (!project) return NextResponse.json({ error: "پروژه یافت نشد" }, { status: 404 });
   await Launch.findOneAndUpdate(
     { sourceProjectId: project._id },

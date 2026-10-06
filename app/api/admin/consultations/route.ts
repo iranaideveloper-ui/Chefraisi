@@ -19,7 +19,7 @@ export async function PATCH(request: Request) {
   const { id, status } = await request.json();
   if (!id || !["pending", "reviewed", "referred"].includes(status)) return NextResponse.json({ error: "داده نامعتبر است" }, { status: 400 });
   await connectDB();
-  const consultation = await Consultation.findByIdAndUpdate(id, { status }, { new: true }).lean();
+  const consultation = await Consultation.findByIdAndUpdate(id, { status }, { returnDocument: "after" }).lean();
   if (!consultation) return NextResponse.json({ error: "درخواست یافت نشد" }, { status: 404 });
   return NextResponse.json({ consultation });
 }

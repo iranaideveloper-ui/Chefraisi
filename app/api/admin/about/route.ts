@@ -90,6 +90,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "اسلایدها، خدمات و مراحل همکاری را کامل کنید" }, { status: 400 });
   }
   await connectDB();
-  const saved = await AboutContent.findOneAndUpdate({ key: "about" }, content, { upsert: true, new: true, runValidators: true }).lean();
+  const saved = await AboutContent.findOneAndUpdate({ key: "about" }, content, { upsert: true, returnDocument: "after", runValidators: true }).lean();
   return NextResponse.json({ content: saved });
 }
